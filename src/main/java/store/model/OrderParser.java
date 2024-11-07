@@ -1,5 +1,7 @@
 package store.model;
 
+import static store.message.InputError.INVALID_FORMAT;
+
 import java.util.Arrays;
 import java.util.List;
 import org.junit.platform.commons.util.StringUtils;
@@ -26,7 +28,7 @@ public class OrderParser {
 
     private void validateBrackets(String order) {
         if (!(order.startsWith("[") && order.endsWith("]"))) {
-            throw new IllegalArgumentException("[ERROR] 올바르지 않은 형식으로 입력했습니다. 다시 입력해 주세요.");
+            throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
         }
     }
 
@@ -46,20 +48,20 @@ public class OrderParser {
     private String[] splitOrderContent(String content) {
         String[] parts = content.split("-");
         if (parts.length != 2) {
-            throw new IllegalArgumentException("[ERROR] 올바르지 않은 형식으로 입력했습니다. 다시 입력해 주세요.");
+            throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
         }
         return parts;
     }
 
     private void validateOrderItemName(String orderItemName) {
         if (StringUtils.isBlank(orderItemName)) {
-            throw new IllegalArgumentException("[ERROR] 올바르지 않은 형식으로 입력했습니다. 다시 입력해 주세요.");
+            throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
         }
     }
 
     private void validateOrderQuantity(String orderQuantity) {
         if (StringUtils.isBlank(orderQuantity)) {
-            throw new IllegalArgumentException("[ERROR] 올바르지 않은 형식으로 입력했습니다. 다시 입력해 주세요.");
+            throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
         }
         validateInteger(orderQuantity);
     }
@@ -68,7 +70,7 @@ public class OrderParser {
         try {
             Integer.parseInt(input);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("[ERROR] 올바르지 않은 형식으로 입력했습니다. 다시 입력해 주세요.");
+            throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
         }
     }
 }
