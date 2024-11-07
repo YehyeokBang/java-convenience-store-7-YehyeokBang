@@ -17,16 +17,4 @@ public class Promotion {
         this.startDate = startDate;
         this.endDate = endDate;
     }
-
-    private Promotion() {
-        this.name = null;
-        this.buyQuantity = 0;
-        this.getQuantity = 0;
-        this.startDate = null;
-        this.endDate = null;
-    }
-
-    public static Promotion getNoPromotion() {
-        return new Promotion();
-    }
 }
