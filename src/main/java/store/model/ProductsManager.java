@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StockStorage {
+public class ProductsManager {
 
     private static final String ADDRESS = "src/main/resources/products.md";
     private static final String SEPARATOR = ",";

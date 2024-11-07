@@ -5,7 +5,9 @@ import store.dto.DisplayItem;
 import store.model.Item;
 import store.model.OrderItem;
 import store.model.OrderParser;
-import store.model.StockStorage;
+import store.model.ProductsManager;
+import store.model.PromotionManager;
+import store.model.Promotions;
 import store.view.InputView;
 import store.view.OutputView;
 
@@ -20,6 +22,8 @@ public class StoreController {
     }
 
     public void start() {
+        PromotionManager promotionManager = new PromotionManager();
+        Promotions promotions = promotionManager.getAllPromotions();
         enterStore();
         List<OrderItem> orders = order();
     }
@@ -36,9 +40,13 @@ public class StoreController {
     }
 
     private List<DisplayItem> getDisplayItems() {
-        StockStorage stockStorage = new StockStorage();
-        List<Item> items = stockStorage.getAllItems();
+        List<Item> items = getItems();
         return getDisplayItems(items);
+    }
+
+    private List<Item> getItems() {
+        ProductsManager productsManager = new ProductsManager();
+        return productsManager.getAllItems();
     }
 
     private List<DisplayItem> getDisplayItems(List<Item> items) {
