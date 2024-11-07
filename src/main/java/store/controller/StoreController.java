@@ -3,6 +3,8 @@ package store.controller;
 import java.util.List;
 import store.dto.DisplayItem;
 import store.model.Item;
+import store.model.OrderItem;
+import store.model.OrderParser;
 import store.model.StockStorage;
 import store.view.InputView;
 import store.view.OutputView;
@@ -19,7 +21,7 @@ public class StoreController {
 
     public void start() {
         enterStore();
-        String rawInputPurchaseItems = inputView.requestPurchaseItems();
+        List<OrderItem> orders = order();
     }
 
     private void enterStore() {
@@ -45,4 +47,9 @@ public class StoreController {
                 .toList();
     }
 
+    private List<OrderItem> order() {
+        String rawInputPurchaseItems = inputView.requestPurchaseItems();
+        OrderParser orderParser = new OrderParser();
+        return orderParser.parse(rawInputPurchaseItems);
+    }
 }
