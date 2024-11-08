@@ -20,6 +20,21 @@ public class ShelfLine {
         this.promotion = promotion;
     }
 
+    public List<Product> takeOut(int quantity) {
+        List<Product> takenProducts = new ArrayList<>();
+        if (quantity > products.size()) {
+            throw new IllegalArgumentException(EXCEEDS_STOCK.getMessage());
+        }
+        for (int i = 0; i < quantity; i++) {
+            takenProducts.add(products.pollFirst());
+        }
+        return takenProducts;
+    }
+
+    public void addLast(Product product) {
+        products.addLast(product);
+    }
+
     public Deque<Product> getProducts() {
         return products;
     }
@@ -34,16 +49,5 @@ public class ShelfLine {
 
     public int getPrice() {
         return price;
-    }
-
-    public List<Product> takeOut(int quantity) {
-        List<Product> takenProducts = new ArrayList<>();
-        if (quantity > products.size()) {
-            throw new IllegalArgumentException(EXCEEDS_STOCK.getMessage());
-        }
-        for (int i = 0; i < quantity; i++) {
-            takenProducts.add(products.pollFirst());
-        }
-        return takenProducts;
     }
 }

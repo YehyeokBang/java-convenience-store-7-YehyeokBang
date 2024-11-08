@@ -52,7 +52,7 @@ public class Promotion {
     }
 
     private void validPromotion() {
-        if (isValid()) {
+        if (!isValid()) {
             throw new IllegalStateException("존재하지 않는 프로모션입니다.");
         }
     }

@@ -61,7 +61,7 @@ public class StoreProductManager {
                 promotionData.buyQuantity(),
                 promotionData.getQuantity(),
                 promotionData.startDate(),
-                promotionData.startDate()
+                promotionData.endDate()
         );
     }
 }

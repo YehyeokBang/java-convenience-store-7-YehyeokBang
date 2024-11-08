@@ -15,6 +15,25 @@ public class Shelf {
         this.lines = lines;
     }
 
+    public void add(Product product) {
+        String productName = product.getName();
+        if (product.hasPromotion()) {
+            ShelfLine findLine = lines.stream()
+                    .filter(line -> line.getProductName().equals(productName))
+                    .filter(line -> line.getPromotion().isValid())
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+            findLine.addLast(product);
+            return;
+        }
+        ShelfLine findLine = lines.stream()
+                .filter(line -> line.getProductName().equals(productName))
+                .filter(line -> !line.getPromotion().isValid())
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        findLine.addLast(product);
+    }
+
     public List<DisplayProduct> getInfo() {
         List<DisplayProduct> displayProducts = new ArrayList<>();
         for (ShelfLine line : lines) {

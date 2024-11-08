@@ -7,6 +7,7 @@ import store.dto.ReceiptData;
 import store.model.OrderItem;
 import store.model.OrderParser;
 import store.model.YesOrNoParser;
+import store.model.store.Product;
 import store.model.store.Store;
 import store.view.InputView;
 import store.view.OutputView;
@@ -28,7 +29,7 @@ public class StoreController {
             enterStore();
             showItems(store.getInfo());
             List<OrderItem> orders = order();
-            store.purchaseProduct(orders);
+            List<Product> products = store.purchaseProduct(orders);
             boolean isMembership = membership();
             printTestReceipt();
             isRepurchase = repurchase();
