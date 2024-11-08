@@ -1,10 +1,13 @@
 package store.model.data;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import store.model.data.product.ProductData;
 import store.model.data.promotion.PromotionData;
 import store.model.store.Product;
 import store.model.store.Promotion;
+import store.model.store.ShelfLine;
 
 public class StoreProductManager {
 
@@ -17,18 +20,23 @@ public class StoreProductManager {
         this.productDataProvider = productDataProvider;
     }
 
-    public List<Product> getProducts() {
+    public List<ShelfLine> getProducts() {
         return productDataProvider.getAll()
                 .stream()
-                .map(this::createProduct)
+                .map(this::createShelfLine)
                 .toList();
     }
 
-    private Product createProduct(ProductData data) {
+    private ShelfLine createShelfLine(ProductData data) {
         String name = data.name();
         int price = data.price();
         Promotion promotion = getPromotion(data.promotion());
-        return new Product(name, price, promotion);
+
+        Deque<Product> products = new ArrayDeque<>();
+        for (int i = 0; i < data.quantity(); i++) {
+            products.addLast(new Product(name, price, promotion));
+        }
+        return new ShelfLine(products, name, price, promotion);
     }
 
     private Promotion getPromotion(String promotionName) {

@@ -3,7 +3,7 @@ package store.view;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
-import store.dto.DisplayItem;
+import store.dto.DisplayProduct;
 
 public class OutputView {
 
@@ -18,38 +18,38 @@ public class OutputView {
         System.out.println(CURRENT_ITEMS_MESSAGE);
     }
 
-    public void printDisplayItems(List<DisplayItem> displayItems) {
+    public void printDisplayItems(List<DisplayProduct> displayProducts) {
         StringBuilder message = new StringBuilder(System.lineSeparator());
-        for (DisplayItem displayItem : displayItems) {
-            message.append(formatName(displayItem))
-                    .append(formatPrice(displayItem))
-                    .append(formatQuantity(displayItem))
-                    .append(formatPromotion(displayItem))
+        for (DisplayProduct displayProduct : displayProducts) {
+            message.append(formatName(displayProduct))
+                    .append(formatPrice(displayProduct))
+                    .append(formatQuantity(displayProduct))
+                    .append(formatPromotion(displayProduct))
                     .append(System.lineSeparator());
         }
         System.out.println(message);
     }
 
-    private String formatPromotion(DisplayItem displayItem) {
-        if (displayItem.promotion().equals("null")) {
+    private String formatPromotion(DisplayProduct displayProduct) {
+        if (displayProduct.promotion().equals("null")) {
             return "";
         }
-        return displayItem.promotion();
+        return displayProduct.promotion();
     }
 
-    private String formatName(DisplayItem displayItem) {
-        return displayItem.name() + " - ";
+    private String formatName(DisplayProduct displayProduct) {
+        return "- " + displayProduct.name() + " ";
     }
 
-    private String formatPrice(DisplayItem displayItem) {
+    private String formatPrice(DisplayProduct displayProduct) {
         NumberFormat numberFormat = NumberFormat.getInstance(Locale.KOREA);
-        return numberFormat.format(displayItem.price()) + "원 ";
+        return numberFormat.format(displayProduct.price()) + "원 ";
     }
 
-    private String formatQuantity(DisplayItem displayItem) {
-        if (displayItem.quantity() == 0) {
-            return "재고 없음";
+    private String formatQuantity(DisplayProduct displayProduct) {
+        if (displayProduct.quantity() == 0) {
+            return "재고 없음 ";
         }
-        return displayItem.quantity() + "개 ";
+        return displayProduct.quantity() + "개 ";
     }
 }

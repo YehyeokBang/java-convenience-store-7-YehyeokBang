@@ -1,11 +1,11 @@
 package store.controller;
 
 import java.util.List;
-import store.dto.DisplayItem;
-import store.model.Item;
+import store.dto.DisplayProduct;
 import store.model.OrderItem;
 import store.model.OrderParser;
-import store.model.StoreManager;
+import store.model.YesOrNoParser;
+import store.model.store.Store;
 import store.view.InputView;
 import store.view.OutputView;
 
@@ -20,34 +20,20 @@ public class StoreController {
     }
 
     public void start() {
+        Store store = Store.open();
         enterStore();
+        showItems(store.getInfo());
         List<OrderItem> orders = order();
+        store.purchaseProduct(orders);
     }
 
     private void enterStore() {
         outputView.printWelcomeMessage();
-        showItems();
     }
 
-    private void showItems() {
+    private void showItems(List<DisplayProduct> products) {
         outputView.printCurrentItemsMessage();
-        List<DisplayItem> displayItems = getDisplayItems();
-        outputView.printDisplayItems(displayItems);
-    }
-
-    private List<DisplayItem> getDisplayItems() {
-        List<Item> items = getItems();
-        return getDisplayItems(items);
-    }
-
-    private List<Item> getItems() {
-        return new StoreManager().getItems();
-    }
-
-    private List<DisplayItem> getDisplayItems(List<Item> items) {
-        return items.stream()
-                .map(DisplayItem::mapFromItem)
-                .toList();
+        outputView.printDisplayItems(products);
     }
 
     private List<OrderItem> order() {
