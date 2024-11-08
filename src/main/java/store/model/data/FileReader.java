@@ -1,4 +1,4 @@
-package store.external;
+package store.model.data;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +19,7 @@ public abstract class FileReader<T> {
             return loadData(reader);
         } catch (IOException e) {
             String message = String.format(FILE_ERROR_MESSAGE, getFileAddress());
-            throw new IllegalStateException();
+            throw new IllegalStateException(message);
         }
     }
 

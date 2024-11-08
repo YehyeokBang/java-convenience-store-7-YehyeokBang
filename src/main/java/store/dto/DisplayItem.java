@@ -1,6 +1,6 @@
 package store.dto;
 
-import store.model.Item;
+import store.model.data.product.ProductData;
 
 public record DisplayItem(
         String name,
@@ -8,12 +8,12 @@ public record DisplayItem(
         int quantity,
         String promotion
 ) {
-    public static DisplayItem mapFromItem(Item item) {
+    public static DisplayItem mapFromItem(ProductData productData) {
         return new DisplayItem(
-                item.getName(),
-                item.getPrice(),
-                item.getQuantity(),
-                item.getPromotion()
+                productData.name(),
+                productData.price(),
+                productData.quantity(),
+                productData.promotion()
         );
     }
 }

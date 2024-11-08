@@ -1,4 +1,4 @@
-package store.external;
+package store.model.data.promotion;
 
 public enum PromotionsFormat {
 
