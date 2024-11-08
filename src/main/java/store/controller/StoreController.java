@@ -9,6 +9,7 @@ import store.model.OrderParser;
 import store.model.YesOrNoParser;
 import store.model.store.Product;
 import store.model.store.Store;
+import store.util.RetryHandler;
 import store.view.InputView;
 import store.view.OutputView;
 
@@ -28,11 +29,10 @@ public class StoreController {
         do {
             enterStore();
             showItems(store.getInfo());
-            List<OrderItem> orders = order();
-            List<Product> products = store.purchaseProduct(orders);
-            boolean isMembership = membership();
+            List<Product> products = RetryHandler.retryIfError(() -> order(store));
+            boolean isMembership = RetryHandler.retryIfError(this::membership);
             printTestReceipt();
-            isRepurchase = repurchase();
+            isRepurchase = RetryHandler.retryIfError(this::repurchase);
         } while (isRepurchase);
     }
 
@@ -45,10 +45,11 @@ public class StoreController {
         outputView.printDisplayItems(products);
     }
 
-    private List<OrderItem> order() {
+    private List<Product> order(Store store) {
         String rawInputPurchaseItems = inputView.requestPurchaseItems();
         OrderParser orderParser = new OrderParser();
-        return orderParser.parse(rawInputPurchaseItems);
+        List<OrderItem> orders = orderParser.parse(rawInputPurchaseItems);
+        return store.purchaseProduct(orders);
     }
 
     private boolean membership() {

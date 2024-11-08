@@ -11,7 +11,7 @@ public class YesOrNoParser {
         if (isNo(rawInput)) {
             return false;
         }
-        throw new IllegalStateException(INVALID_FORMAT.getMessage());
+        throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
     }
 
     private static boolean isYes(String rawInput) {

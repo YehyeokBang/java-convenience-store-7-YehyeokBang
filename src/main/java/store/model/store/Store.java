@@ -11,6 +11,7 @@ import store.model.data.product.ProductData;
 import store.model.data.product.ProductsDataProvider;
 import store.model.data.promotion.PromotionData;
 import store.model.data.promotion.PromotionsDataProvider;
+import store.util.RetryHandler;
 import store.view.InputView;
 
 public class Store {
@@ -84,25 +85,32 @@ public class Store {
 
         if (remainingQuantity >= buyQuantity) {
             int additionalQuantityNeeded = buyQuantity + freeQuantity - remainingQuantity;
-            String rawInputNoPromotion = new InputView().requestFreePromotion(
-                    promotionProducts.getFirst().getName(),
-                    additionalQuantityNeeded
-            );
-            if (new YesOrNoParser().parse(rawInputNoPromotion)) {
-                return 1;
-            }
-            return 0;
+            return RetryHandler.retryIfError(() -> requestFreeGet(promotionProducts, additionalQuantityNeeded));
         }
 
         String productName = promotionProducts.getFirst().getName();
         int normalProductsCount = getNormalProductsCount(takenProducts);
         int quantityNotApplied = buyQuantity - remainingQuantity + normalProductsCount;
+        return RetryHandler.retryIfError(() -> requestNoPromotionProduct(productName, quantityNotApplied));
+    }
 
+    private int requestNoPromotionProduct(String productName, int quantityNotApplied) {
         String rawInputNoPromotion = new InputView().requestNoPromotion(productName, quantityNotApplied);
         if (new YesOrNoParser().parse(rawInputNoPromotion)) {
             return 0;
         }
         return -quantityNotApplied;
+    }
+
+    private int requestFreeGet(List<Product> promotionProducts, int additionalQuantityNeeded) {
+        String rawInputNoPromotion = new InputView().requestFreePromotion(
+                promotionProducts.getFirst().getName(),
+                additionalQuantityNeeded
+        );
+        if (new YesOrNoParser().parse(rawInputNoPromotion)) {
+            return 1;
+        }
+        return 0;
     }
 
     private int getNormalProductsCount(List<Product> takenProducts) {
