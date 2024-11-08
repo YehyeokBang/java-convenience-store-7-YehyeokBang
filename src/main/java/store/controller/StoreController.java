@@ -23,11 +23,40 @@ public class StoreController {
 
     public void start() {
         Store store = Store.open();
-        enterStore();
-        showItems(store.getInfo());
-        List<OrderItem> orders = order();
-        store.purchaseProduct(orders);
-        boolean isMembership = membership();
+        boolean isRepurchase;
+        do {
+            enterStore();
+            showItems(store.getInfo());
+            List<OrderItem> orders = order();
+            store.purchaseProduct(orders);
+            boolean isMembership = membership();
+            printTestReceipt();
+            isRepurchase = repurchase();
+        } while (isRepurchase);
+    }
+
+    private void enterStore() {
+        outputView.printWelcomeMessage();
+    }
+
+    private void showItems(List<DisplayProduct> products) {
+        outputView.printCurrentItemsMessage();
+        outputView.printDisplayItems(products);
+    }
+
+    private List<OrderItem> order() {
+        String rawInputPurchaseItems = inputView.requestPurchaseItems();
+        OrderParser orderParser = new OrderParser();
+        return orderParser.parse(rawInputPurchaseItems);
+    }
+
+    private boolean membership() {
+        String rawInputMembership = inputView.requestMembership();
+        return new YesOrNoParser().parse(rawInputMembership);
+    }
+
+    // TODO: 기능 구현 후 제거 필요
+    private void printTestReceipt() {
         ReceiptData receiptData = testReceipt();
         outputView.printReceipt(receiptData);
     }
@@ -52,23 +81,8 @@ public class StoreController {
         );
     }
 
-    private boolean membership() {
-        String rawInputMembership = inputView.requestMembershipMessage();
-        return new YesOrNoParser().parse(rawInputMembership);
-    }
-
-    private void enterStore() {
-        outputView.printWelcomeMessage();
-    }
-
-    private void showItems(List<DisplayProduct> products) {
-        outputView.printCurrentItemsMessage();
-        outputView.printDisplayItems(products);
-    }
-
-    private List<OrderItem> order() {
-        String rawInputPurchaseItems = inputView.requestPurchaseItems();
-        OrderParser orderParser = new OrderParser();
-        return orderParser.parse(rawInputPurchaseItems);
+    private boolean repurchase() {
+        String rawInputRepurchase = inputView.requestRepurchase();
+        return new YesOrNoParser().parse(rawInputRepurchase);
     }
 }
