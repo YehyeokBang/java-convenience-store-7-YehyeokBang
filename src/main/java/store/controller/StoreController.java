@@ -25,6 +25,12 @@ public class StoreController {
         showItems(store.getInfo());
         List<OrderItem> orders = order();
         store.purchaseProduct(orders);
+        boolean isMembership = membership();
+    }
+
+    private boolean membership() {
+        String rawInputMembership = inputView.requestMembershipMessage();
+        return new YesOrNoParser().parse(rawInputMembership);
     }
 
     private void enterStore() {
