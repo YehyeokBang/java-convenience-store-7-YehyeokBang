@@ -3,30 +3,30 @@ package store.model.store;
 import java.util.ArrayList;
 import java.util.List;
 import store.dto.DisplayProduct;
-import store.model.OrderItem;
-import store.model.YesOrNoParser;
+import store.model.order.Order;
 import store.model.data.StoreDataProvider;
 import store.model.data.StoreProductManager;
 import store.model.data.product.ProductData;
 import store.model.data.product.ProductsDataProvider;
 import store.model.data.promotion.PromotionData;
 import store.model.data.promotion.PromotionsDataProvider;
-import store.util.RetryHandler;
-import store.view.InputView;
+import store.model.order.parser.ConsoleOrderParser;
 
 public class Store {
 
     private static final String PROMOTIONS_FILE_URL = "src/main/resources/promotions.md";
     private static final String PRODUCTS_FILE_URL = "src/main/resources/products.md";
 
+    private final StoreStaff storeStaff;
     private final Shelf shelf;
 
-    private Store(Shelf shelf) {
+    private Store(StoreStaff storeStaff, Shelf shelf) {
+        this.storeStaff = storeStaff;
         this.shelf = shelf;
     }
 
     public static Store open() {
-        return new Store(new Shelf(getProducts()));
+        return new Store(new StoreStaff(new ConsoleOrderParser()), new Shelf(getProducts()));
     }
 
     private static List<ShelfLine> getProducts() {
@@ -44,9 +44,14 @@ public class Store {
         return shelf.getInfo();
     }
 
-    public List<Product> purchaseProduct(List<OrderItem> orders) {
+    public List<Product> purchaseProduct(String orderMessage) {
+        List<Order> orders = storeStaff.order(orderMessage);
+        return takeOutProducts(orders);
+    }
+
+    private List<Product> takeOutProducts(List<Order> orders) {
         List<Product> cart = new ArrayList<>();
-        for (OrderItem order : orders) {
+        for (Order order : orders) {
             List<Product> takenProducts = shelf.takeOut(order.getName(), order.getQuantity());
             cart.addAll(takenProducts);
             int count = checkPromotion(takenProducts);
@@ -65,60 +70,6 @@ public class Store {
     }
 
     private int checkPromotion(List<Product> takenProducts) {
-        List<Product> promotionProducts = takenProducts.stream()
-                .filter(Product::hasPromotion)
-                .toList();
-        if (promotionProducts.isEmpty()) {
-            return 0;
-        }
-        Promotion promotion = promotionProducts.getFirst().getPromotion();
-        if (!promotion.isValid() || !promotion.isApplicableToday()) {
-            return 0;
-        }
-
-        int buyQuantity = promotion.getBuyQuantity();
-        int freeQuantity = promotion.getFreeQuantity();
-        int totalPromotionQuantity = promotionProducts.size();
-
-        if (totalPromotionQuantity % (buyQuantity + freeQuantity) == 0) {
-            return 0;
-        }
-
-        int remainingQuantity = totalPromotionQuantity % (buyQuantity + freeQuantity);
-
-        if (remainingQuantity >= buyQuantity) {
-            int additionalQuantityNeeded = buyQuantity + freeQuantity - remainingQuantity;
-            return RetryHandler.retryIfError(() -> requestFreeGet(promotionProducts, additionalQuantityNeeded));
-        }
-
-        String productName = promotionProducts.getFirst().getName();
-        int normalProductsCount = getNormalProductsCount(takenProducts);
-        int quantityNotApplied = buyQuantity - remainingQuantity + normalProductsCount;
-        return RetryHandler.retryIfError(() -> requestNoPromotionProduct(productName, quantityNotApplied));
-    }
-
-    private int requestNoPromotionProduct(String productName, int quantityNotApplied) {
-        String rawInputNoPromotion = new InputView().requestNoPromotion(productName, quantityNotApplied);
-        if (new YesOrNoParser().parse(rawInputNoPromotion)) {
-            return 0;
-        }
-        return -quantityNotApplied;
-    }
-
-    private int requestFreeGet(List<Product> promotionProducts, int additionalQuantityNeeded) {
-        String rawInputNoPromotion = new InputView().requestFreePromotion(
-                promotionProducts.getFirst().getName(),
-                additionalQuantityNeeded
-        );
-        if (new YesOrNoParser().parse(rawInputNoPromotion)) {
-            return 1;
-        }
-        return 0;
-    }
-
-    private int getNormalProductsCount(List<Product> takenProducts) {
-        return (int) takenProducts.stream()
-                .filter(product -> !product.hasPromotion())
-                .count();
+        return storeStaff.checkPromotion(takenProducts);
     }
 }
