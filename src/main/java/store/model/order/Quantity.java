@@ -1,6 +1,6 @@
 package store.model.order;
 
-import static store.message.InputError.MIN_ORDER_QUANTITY;
+import static store.message.InputErrorMessage.MIN_ORDER_QUANTITY;
 
 public class Quantity {
 
@@ -15,7 +15,7 @@ public class Quantity {
 
     private void validateQuantity(int quantity) {
         if (quantity < MINIMUM_ORDER_QUANTITY) {
-            throw new IllegalArgumentException(MIN_ORDER_QUANTITY.getMessage());
+            throw new IllegalArgumentException(MIN_ORDER_QUANTITY.get());
         }
     }
 

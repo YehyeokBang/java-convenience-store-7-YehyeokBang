@@ -1,6 +1,6 @@
 package store.model;
 
-import static store.message.InputError.*;
+import static store.message.InputErrorMessage.*;
 
 public class YesOrNoParser {
 
@@ -11,7 +11,7 @@ public class YesOrNoParser {
         if (isNo(rawInput)) {
             return false;
         }
-        throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
+        throw new IllegalArgumentException(INVALID_FORMAT.get());
     }
 
     private static boolean isYes(String rawInput) {

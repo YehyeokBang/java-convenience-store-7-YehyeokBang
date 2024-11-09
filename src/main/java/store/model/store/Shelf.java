@@ -1,7 +1,7 @@
 package store.model.store;
 
-import static store.message.InputError.EXCEEDS_STOCK;
-import static store.message.InputError.NON_EXISTENT_PRODUCT;
+import static store.message.InputErrorMessage.EXCEEDS_STOCK;
+import static store.message.InputErrorMessage.NON_EXISTENT_PRODUCT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +81,7 @@ public class Shelf {
 
     private void validateLines(List<ShelfLine> findLines) {
         if (findLines.isEmpty()) {
-            throw new IllegalArgumentException(NON_EXISTENT_PRODUCT.getMessage());
+            throw new IllegalArgumentException(NON_EXISTENT_PRODUCT.get());
         }
     }
 
@@ -105,7 +105,7 @@ public class Shelf {
 
     private void validateStock(int quantity, ShelfLine promotionLine, ShelfLine normalLine) {
         if (quantity > getTotalStockCount(promotionLine, normalLine)) {
-            throw new IllegalArgumentException(EXCEEDS_STOCK.getMessage());
+            throw new IllegalArgumentException(EXCEEDS_STOCK.get());
         }
     }
 

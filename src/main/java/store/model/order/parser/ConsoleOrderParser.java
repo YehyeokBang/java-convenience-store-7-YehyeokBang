@@ -1,6 +1,6 @@
 package store.model.order.parser;
 
-import static store.message.InputError.INVALID_FORMAT;
+import static store.message.InputErrorMessage.INVALID_FORMAT;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +39,7 @@ public class ConsoleOrderParser implements OrderParser<String> {
 
     private void validateBrackets(String order) {
         if (!(order.startsWith(START_BRACKET) && order.endsWith(END_BRACKET))) {
-            throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
+            throw new IllegalArgumentException(INVALID_FORMAT.get());
         }
     }
 
@@ -58,7 +58,7 @@ public class ConsoleOrderParser implements OrderParser<String> {
     private String[] splitOrderContent(String content) {
         String[] parts = content.split(CONTENT_SEPARATOR);
         if (parts.length != REQUIRED_PARTS_COUNT) {
-            throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
+            throw new IllegalArgumentException(INVALID_FORMAT.get());
         }
         return parts;
     }
@@ -67,7 +67,7 @@ public class ConsoleOrderParser implements OrderParser<String> {
         try {
             Integer.parseInt(input);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(INVALID_FORMAT.getMessage());
+            throw new IllegalArgumentException(INVALID_FORMAT.get());
         }
     }
 }

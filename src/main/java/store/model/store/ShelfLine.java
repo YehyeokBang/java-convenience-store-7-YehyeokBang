@@ -1,6 +1,6 @@
 package store.model.store;
 
-import static store.message.InputError.EXCEEDS_STOCK;
+import static store.message.InputErrorMessage.EXCEEDS_STOCK;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -23,7 +23,7 @@ public class ShelfLine {
     public List<Product> takeOut(int quantity) {
         List<Product> takenProducts = new ArrayList<>();
         if (quantity > products.size()) {
-            throw new IllegalArgumentException(EXCEEDS_STOCK.getMessage());
+            throw new IllegalArgumentException(EXCEEDS_STOCK.get());
         }
         for (int i = 0; i < quantity; i++) {
             takenProducts.add(products.pollFirst());
