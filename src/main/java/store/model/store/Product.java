@@ -16,13 +16,6 @@ public class Product {
         return promotion.isValid();
     }
 
-    public String getPromotionName() {
-        if (hasPromotion()) {
-            return promotion.getName();
-        }
-        return "";
-    }
-
     public String getName() {
         return name;
     }
@@ -36,14 +29,5 @@ public class Product {
             return promotion;
         }
         throw new IllegalStateException("존재하지 않는 프로모션입니다.");
-    }
-
-    @Override
-    public String toString() {
-        return "Product{" +
-                "name='" + name + '\'' +
-                ", price=" + price +
-                ", promotion=" + promotion +
-                '}';
     }
 }
