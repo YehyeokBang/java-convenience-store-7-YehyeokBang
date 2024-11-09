@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 import store.dto.DisplayProduct;
 import store.dto.ProductInfo;
 import store.dto.ReceiptData;
-import store.model.OrderItem;
-import store.model.OrderParser;
 import store.model.YesOrNoParser;
 import store.model.store.Membership;
 import store.model.store.Product;
@@ -53,9 +51,7 @@ public class StoreController {
 
     private List<Product> order(Store store) {
         String rawInputPurchaseItems = inputView.requestPurchaseItems();
-        OrderParser orderParser = new OrderParser();
-        List<OrderItem> orders = orderParser.parse(rawInputPurchaseItems);
-        return store.purchaseProduct(orders);
+        return store.purchaseProduct(rawInputPurchaseItems);
     }
 
     private boolean membership() {
