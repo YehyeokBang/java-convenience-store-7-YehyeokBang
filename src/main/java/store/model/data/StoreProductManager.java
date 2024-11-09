@@ -30,7 +30,7 @@ public class StoreProductManager {
     private ShelfLine createShelfLine(ProductData data) {
         String name = data.name();
         int price = data.price();
-        Promotion promotion = getPromotion(data.promotion());
+        Promotion promotion = getPromotion(data.promotionName());
 
         Deque<Product> products = new ArrayDeque<>();
         for (int i = 0; i < data.quantity(); i++) {
