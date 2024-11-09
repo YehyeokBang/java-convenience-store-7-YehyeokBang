@@ -1,13 +1,13 @@
-package store.model.data.product;
+package store.data.product;
 
-import static store.model.data.product.ProductsFormat.NAME;
-import static store.model.data.product.ProductsFormat.PRICE;
-import static store.model.data.product.ProductsFormat.PROMOTION;
-import static store.model.data.product.ProductsFormat.QUANTITY;
+import static store.data.product.ProductsFormat.NAME;
+import static store.data.product.ProductsFormat.PRICE;
+import static store.data.product.ProductsFormat.PROMOTION;
+import static store.data.product.ProductsFormat.QUANTITY;
 
 import java.util.List;
-import store.model.data.FileReader;
-import store.model.data.StoreDataProvider;
+import store.data.FileReader;
+import store.data.StoreDataProvider;
 
 public class ProductsDataProvider extends FileReader<ProductData>
         implements StoreDataProvider<ProductData> {

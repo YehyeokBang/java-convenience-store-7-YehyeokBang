@@ -1,4 +1,4 @@
-package store.model.data.promotion;
+package store.data.promotion;
 
 import java.time.LocalDate;
 

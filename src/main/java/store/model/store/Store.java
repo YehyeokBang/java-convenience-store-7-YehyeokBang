@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import store.dto.DisplayProduct;
 import store.model.order.Order;
-import store.model.data.StoreDataProvider;
-import store.model.data.StoreProductManager;
-import store.model.data.product.ProductData;
-import store.model.data.product.ProductsDataProvider;
-import store.model.data.promotion.PromotionData;
-import store.model.data.promotion.PromotionsDataProvider;
+import store.data.StoreDataProvider;
+import store.data.StoreProductManager;
+import store.data.product.ProductData;
+import store.data.product.ProductsDataProvider;
+import store.data.promotion.PromotionData;
+import store.data.promotion.PromotionsDataProvider;
 import store.model.order.parser.ConsoleOrderParser;
 
 public class Store {

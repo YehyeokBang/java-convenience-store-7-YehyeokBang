@@ -1,4 +1,4 @@
-package store.model.data;
+package store.data;
 
 import java.io.BufferedReader;
 import java.io.IOException;

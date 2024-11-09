@@ -1,16 +1,17 @@
-package store.model.data.product;
+package store.data.promotion;
 
-public enum ProductsFormat {
+public enum PromotionsFormat {
 
     NAME(0),
-    PRICE(1),
-    QUANTITY(2),
-    PROMOTION(3),
+    BUY_QUANTITY(1),
+    GET_QUANTITY(2),
+    START_DATE(3),
+    END_DATE(4),
     ;
 
     private final int columnPosition;
 
-    ProductsFormat(int columnPosition) {
+    PromotionsFormat(int columnPosition) {
         this.columnPosition = columnPosition;
     }
 

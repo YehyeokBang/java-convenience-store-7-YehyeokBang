@@ -1,4 +1,4 @@
-package store.model.data.product;
+package store.data.product;
 
 public record ProductData(
         String name,

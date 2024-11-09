@@ -1,10 +1,10 @@
-package store.model.data;
+package store.data;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
-import store.model.data.product.ProductData;
-import store.model.data.promotion.PromotionData;
+import store.data.product.ProductData;
+import store.data.promotion.PromotionData;
 import store.model.store.Product;
 import store.model.store.Promotion;
 import store.model.store.ShelfLine;

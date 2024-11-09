@@ -1,15 +1,15 @@
-package store.model.data.promotion;
+package store.data.promotion;
 
-import static store.model.data.promotion.PromotionsFormat.BUY_QUANTITY;
-import static store.model.data.promotion.PromotionsFormat.END_DATE;
-import static store.model.data.promotion.PromotionsFormat.GET_QUANTITY;
-import static store.model.data.promotion.PromotionsFormat.NAME;
-import static store.model.data.promotion.PromotionsFormat.START_DATE;
+import static store.data.promotion.PromotionsFormat.BUY_QUANTITY;
+import static store.data.promotion.PromotionsFormat.END_DATE;
+import static store.data.promotion.PromotionsFormat.GET_QUANTITY;
+import static store.data.promotion.PromotionsFormat.NAME;
+import static store.data.promotion.PromotionsFormat.START_DATE;
 
 import java.time.LocalDate;
 import java.util.List;
-import store.model.data.FileReader;
-import store.model.data.StoreDataProvider;
+import store.data.FileReader;
+import store.data.StoreDataProvider;
 
 public class PromotionsDataProvider extends FileReader<PromotionData>
         implements StoreDataProvider<PromotionData> {
