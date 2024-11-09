@@ -1,6 +1,9 @@
 package store.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import store.dto.DisplayProduct;
 import store.dto.ProductInfo;
 import store.dto.ReceiptData;
@@ -8,6 +11,7 @@ import store.model.OrderItem;
 import store.model.OrderParser;
 import store.model.YesOrNoParser;
 import store.model.store.Product;
+import store.model.store.Promotion;
 import store.model.store.Store;
 import store.util.RetryHandler;
 import store.view.InputView;
@@ -31,7 +35,8 @@ public class StoreController {
             showItems(store.getInfo());
             List<Product> products = RetryHandler.retryIfError(() -> order(store));
             boolean isMembership = RetryHandler.retryIfError(this::membership);
-            printTestReceipt();
+            ReceiptData receiptData = calculateProducts(products, isMembership);
+            printReceipt(receiptData);
             isRepurchase = RetryHandler.retryIfError(this::repurchase);
         } while (isRepurchase);
     }
@@ -57,30 +62,82 @@ public class StoreController {
         return new YesOrNoParser().parse(rawInputMembership);
     }
 
-    // TODO: 기능 구현 후 제거 필요
-    private void printTestReceipt() {
-        ReceiptData receiptData = testReceipt();
+    private void printReceipt(ReceiptData receiptData) {
         outputView.printReceipt(receiptData);
     }
 
-    // TODO: 기능 구현 후 제거 필요
-    private ReceiptData testReceipt() {
-        List<ProductInfo> products = List.of(
-                new ProductInfo("콜라", 3000, 3),
-                new ProductInfo("에너지바", 10000, 5)
-        );
-        List<ProductInfo> promotionProducts = List.of(
-                new ProductInfo("콜라", 0, 1)
-        );
+    private ReceiptData calculateProducts(List<Product> products, boolean isMembership) {
+        Map<String, List<Product>> groupedProducts = products.stream()
+                .collect(Collectors.groupingBy(Product::getName));
+
+        List<ProductInfo> productInfos = new ArrayList<>();
+        List<ProductInfo> promotionProducts = new ArrayList<>();
+        int totalPrice = 0;
+        int totalQuantity = 0;
+        int promotionDiscount = 0;
+
+        for (Map.Entry<String, List<Product>> entry : groupedProducts.entrySet()) {
+            String productName = entry.getKey();
+            List<Product> productList = entry.getValue();
+            List<Product> promotionProducts2 = productList.stream()
+                    .filter(Product::hasPromotion)
+                    .toList();
+            Product product = productList.getFirst();
+            int quantity = productList.size();
+            int quantity2 = promotionProducts2.size();
+            int price = product.getPrice();
+
+            int promotionQuantity = 0;
+            if (product.hasPromotion()) {
+                Promotion promotion = product.getPromotion();
+                if (promotion.isApplicableToday()) {
+                    int buyQuantity = promotion.getBuyQuantity();
+                    int freeQuantity = promotion.getFreeQuantity();
+                    promotionQuantity = quantity2 / (buyQuantity + freeQuantity);
+                }
+            }
+            int productTotalPrice = price * quantity;
+            totalPrice += productTotalPrice;
+
+            productInfos.add(new ProductInfo(productName, price, quantity));
+            if (promotionQuantity > 0) {
+                promotionDiscount = price * promotionQuantity;
+                promotionProducts.add(new ProductInfo(productName, price, promotionQuantity));
+            }
+
+            totalQuantity += quantity;
+        }
+
+        int membershipDiscountPrice = getMembershipDiscountPrice(isMembership, totalPrice);
+
+        int finalPrice = totalPrice - membershipDiscountPrice - promotionDiscount;
         return new ReceiptData(
-                products,
+                productInfos,
                 promotionProducts,
-                8,
-                13000,
-                1000,
-                3000,
-                9000
+                totalQuantity,
+                totalPrice,
+                promotionDiscount,
+                membershipDiscountPrice,
+                finalPrice
         );
+    }
+
+    private int getMembershipDiscountPrice(boolean isMembership, int totalPrice) {
+        int membershipDiscountPrice = 0;
+        if (isMembership) {
+            membershipDiscountPrice = totalPrice * 30 / 100;
+        }
+        if (membershipDiscountPrice > 8_000) {
+            membershipDiscountPrice = 8_000;
+        }
+        if (totalPrice <= 10_000) {
+            return 0;
+        }
+        int finalPriceAfterDiscount = totalPrice - membershipDiscountPrice;
+        if (finalPriceAfterDiscount < 10_000) {
+            membershipDiscountPrice = totalPrice - 10_000;
+        }
+        return membershipDiscountPrice;
     }
 
     private boolean repurchase() {

@@ -48,9 +48,9 @@ public class Store {
         List<Product> cart = new ArrayList<>();
         for (OrderItem order : orders) {
             List<Product> takenProducts = shelf.takeOut(order.getName(), order.getQuantity());
+            cart.addAll(takenProducts);
             int count = checkPromotion(takenProducts);
             if (count == 0) {
-                cart.addAll(takenProducts);
                 continue;
             }
             if (count > 0) {
@@ -58,7 +58,7 @@ public class Store {
                 continue;
             }
             for (int i = count; i < 0; i++) {
-                shelf.add(takenProducts.removeLast());
+                shelf.add(cart.removeLast());
             }
         }
         return cart;
@@ -68,7 +68,6 @@ public class Store {
         List<Product> promotionProducts = takenProducts.stream()
                 .filter(Product::hasPromotion)
                 .toList();
-
         if (promotionProducts.isEmpty()) {
             return 0;
         }
@@ -78,9 +77,13 @@ public class Store {
         }
 
         int buyQuantity = promotion.getBuyQuantity();
-        int freeQuantity = promotion.getGetQuantity();
-
+        int freeQuantity = promotion.getFreeQuantity();
         int totalPromotionQuantity = promotionProducts.size();
+
+        if (totalPromotionQuantity % (buyQuantity + freeQuantity) == 0) {
+            return 0;
+        }
+
         int remainingQuantity = totalPromotionQuantity % (buyQuantity + freeQuantity);
 
         if (remainingQuantity >= buyQuantity) {

@@ -16,6 +16,7 @@ public class OutputView {
     private static final String PROMOTION_HEADER = "===========증\t정=============\n";
     private static final String TOTAL_LABEL = "%-8s\t\t%-2s\t\t%,d\n";
     private static final String DISCOUNT_LABEL = "%-10s\t\t\t-%,d\n";
+    private static final String TOTAL_PRICE_LABEL = "%-10s\t\t\t%,d\n";
     private static final String RECEIPT_FOOTER = "==============================\n";
 
     public void printWelcomeMessage() {
@@ -92,6 +93,6 @@ public class OutputView {
         receipt.append(String.format(TOTAL_LABEL, "총구매액", receiptData.totalQuantity(), receiptData.totalPrice()));
         receipt.append(String.format(DISCOUNT_LABEL, "행사할인", receiptData.discountPrice()));
         receipt.append(String.format(DISCOUNT_LABEL, "멤버십할인", receiptData.membershipPrice()));
-        receipt.append(String.format(DISCOUNT_LABEL, "내실돈\t", receiptData.finalPrice()));
+        receipt.append(String.format(TOTAL_PRICE_LABEL, "내실돈\t", receiptData.finalPrice()));
     }
 }
