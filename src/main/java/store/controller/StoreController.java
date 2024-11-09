@@ -10,6 +10,7 @@ import store.dto.ReceiptData;
 import store.model.OrderItem;
 import store.model.OrderParser;
 import store.model.YesOrNoParser;
+import store.model.store.Membership;
 import store.model.store.Product;
 import store.model.store.Promotion;
 import store.model.store.Store;
@@ -123,21 +124,7 @@ public class StoreController {
     }
 
     private int getMembershipDiscountPrice(boolean isMembership, int totalPrice) {
-        int membershipDiscountPrice = 0;
-        if (isMembership) {
-            membershipDiscountPrice = totalPrice * 30 / 100;
-        }
-        if (membershipDiscountPrice > 8_000) {
-            membershipDiscountPrice = 8_000;
-        }
-        if (totalPrice <= 10_000) {
-            return 0;
-        }
-        int finalPriceAfterDiscount = totalPrice - membershipDiscountPrice;
-        if (finalPriceAfterDiscount < 10_000) {
-            membershipDiscountPrice = totalPrice - 10_000;
-        }
-        return membershipDiscountPrice;
+        return new Membership().getMembershipDiscountPrice(isMembership, totalPrice);
     }
 
     private boolean repurchase() {
