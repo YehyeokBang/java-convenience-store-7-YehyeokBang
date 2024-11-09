@@ -2,8 +2,6 @@ package store.model.store;
 
 import java.util.List;
 import store.model.YesOrNoParser;
-import store.model.order.Order;
-import store.model.order.parser.OrderParser;
 import store.util.RetryHandler;
 import store.view.InputView;
 
@@ -11,16 +9,6 @@ public class StoreStaff {
 
     private static final int NO_PROMOTION = 0;
     private static final int NO_CHANGE = 0;
-
-    private final OrderParser<String> orderParser;
-
-    public StoreStaff(OrderParser<String> orderParser) {
-        this.orderParser = orderParser;
-    }
-
-    public List<Order> order(String orderMessage) {
-        return orderParser.parse(orderMessage);
-    }
 
     public int checkPromotion(List<Product> takenProducts) {
         List<Product> promotionProducts = getValidPromotionProducts(takenProducts);
@@ -68,7 +56,8 @@ public class StoreStaff {
         return promotion.getBuyQuantity() + promotion.getFreeQuantity() - remainingQuantity;
     }
 
-    private int handleNormalProductPromotion(List<Product> takenProducts, List<Product> promotionProducts, int remainingQuantity) {
+    private int handleNormalProductPromotion(List<Product> takenProducts, List<Product> promotionProducts,
+                                             int remainingQuantity) {
         Promotion promotion = promotionProducts.getFirst().getPromotion();
         String productName = promotionProducts.getFirst().getName();
         int normalProductsCount = getNormalProductsCount(takenProducts);

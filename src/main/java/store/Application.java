@@ -1,6 +1,8 @@
 package store;
 
 import store.controller.StoreController;
+import store.model.order.parser.ConsoleOrderParser;
+import store.model.order.parser.OrderParser;
 import store.view.InputView;
 import store.view.OutputView;
 
@@ -14,6 +16,7 @@ public class Application {
     private static StoreController initController() {
         InputView inputView = new InputView();
         OutputView outputView = new OutputView();
-        return new StoreController(inputView, outputView);
+        OrderParser<String> orderParser = new ConsoleOrderParser();
+        return new StoreController(inputView, outputView, orderParser);
     }
 }

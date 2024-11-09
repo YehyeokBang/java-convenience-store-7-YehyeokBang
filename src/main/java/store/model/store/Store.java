@@ -1,16 +1,13 @@
 package store.model.store;
 
-import java.util.ArrayList;
 import java.util.List;
 import store.dto.DisplayProduct;
-import store.model.order.Order;
 import store.data.StoreDataProvider;
 import store.data.StoreProductManager;
 import store.data.product.ProductData;
 import store.data.product.ProductsDataProvider;
 import store.data.promotion.PromotionData;
 import store.data.promotion.PromotionsDataProvider;
-import store.model.order.parser.ConsoleOrderParser;
 
 public class Store {
 
@@ -26,7 +23,15 @@ public class Store {
     }
 
     public static Store open() {
-        return new Store(new StoreStaff(new ConsoleOrderParser()), new Shelf(getProducts()));
+        return new Store(hireStoreStaff(), initShelf());
+    }
+
+    private static StoreStaff hireStoreStaff() {
+        return new StoreStaff();
+    }
+
+    private static Shelf initShelf() {
+        return new Shelf(getProducts());
     }
 
     private static List<ShelfLine> getProducts() {
@@ -44,32 +49,11 @@ public class Store {
         return shelf.getInfo();
     }
 
-    public List<Product> purchaseProduct(String orderMessage) {
-        List<Order> orders = storeStaff.order(orderMessage);
-        return takeOutProducts(orders);
+    public StoreStaff getStoreStaff() {
+        return storeStaff;
     }
 
-    private List<Product> takeOutProducts(List<Order> orders) {
-        List<Product> cart = new ArrayList<>();
-        for (Order order : orders) {
-            List<Product> takenProducts = shelf.takeOut(order.getName(), order.getQuantity());
-            cart.addAll(takenProducts);
-            int count = checkPromotion(takenProducts);
-            if (count == 0) {
-                continue;
-            }
-            if (count > 0) {
-                cart.addAll(shelf.takeOut(order.getName(), 1));
-                continue;
-            }
-            for (int i = count; i < 0; i++) {
-                shelf.add(cart.removeLast());
-            }
-        }
-        return cart;
-    }
-
-    private int checkPromotion(List<Product> takenProducts) {
-        return storeStaff.checkPromotion(takenProducts);
+    public Shelf getShelf() {
+        return shelf;
     }
 }

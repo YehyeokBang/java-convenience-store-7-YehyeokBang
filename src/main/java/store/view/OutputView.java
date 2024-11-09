@@ -10,7 +10,7 @@ import store.dto.ReceiptData;
 public class OutputView {
 
     private static final String WELCOME_MESSAGE = "안녕하세요. W편의점입니다.";
-    private static final String CURRENT_ITEMS_MESSAGE = "현재 보유하고 있는 상품입니다.";
+    private static final String CURRENT_PRODUCTS_MESSAGE = "현재 보유하고 있는 상품입니다.";
     private static final String RECEIPT_HEADER = "===========W 편의점=============\n";
     private static final String PRODUCT_HEADER = String.format("%-8s\t\t%-2s\t\t%s\n", "상품명", "수량", "금액");
     private static final String PROMOTION_HEADER = "===========증\t정=============\n";
@@ -23,11 +23,11 @@ public class OutputView {
         System.out.println(WELCOME_MESSAGE);
     }
 
-    public void printCurrentItemsMessage() {
-        System.out.println(CURRENT_ITEMS_MESSAGE);
+    public void printCurrentProductsMessage() {
+        System.out.println(CURRENT_PRODUCTS_MESSAGE);
     }
 
-    public void printDisplayItems(List<DisplayProduct> displayProducts) {
+    public void printDisplayProducts(List<DisplayProduct> displayProducts) {
         StringBuilder message = new StringBuilder(System.lineSeparator());
         for (DisplayProduct displayProduct : displayProducts) {
             message.append(formatName(displayProduct))
