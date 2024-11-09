@@ -14,6 +14,8 @@ import store.model.order.parser.OrderParser;
 import store.model.store.Membership;
 import store.model.store.Product;
 import store.model.store.Promotion;
+import store.model.store.PromotionResult;
+import store.model.store.PromotionResultType;
 import store.model.store.Shelf;
 import store.model.store.Store;
 import store.model.store.StoreStaff;
@@ -82,21 +84,53 @@ public class StoreController {
         for (Order order : orders) {
             customer.addProductsInShoppingCart(shelf, order);
             List<Product> takenProducts = customer.unloadShoppingCart();
-            int changeCount = storeStaff.checkPromotion(takenProducts);
-            change(shelf, takenProducts, order.getName(), changeCount);
+            PromotionResult promotionResult = storeStaff.evaluatePromotion(takenProducts);
+            processPromotionChange(shelf, takenProducts, promotionResult);
             products.addAll(takenProducts);
         }
         return products;
     }
 
-    private void change(Shelf shelf, List<Product> takenProducts, String productName, int changeCount) {
-        if (changeCount == 1) {
-            shelf.takeOut(productName, 1);
+    private void processPromotionChange(Shelf shelf, List<Product> takenProducts, PromotionResult promotionResult) {
+        if (isNotChange(promotionResult)) {
             return;
         }
-        for (int i = changeCount; i < 0; i++) {
-            shelf.add(takenProducts.removeLast());
+        if (promotionResult.checkType(PromotionResultType.FREE_PRODUCT_AVAILABLE)) {
+            offerFreeProductIfAccepted(shelf, promotionResult);
+            return;
         }
+        if (promotionResult.checkType(PromotionResultType.PROMOTION_INSUFFICIENT_STOCK)) {
+            confirmPurchaseOrDiscard(shelf, takenProducts, promotionResult);
+        }
+    }
+
+    private void offerFreeProductIfAccepted(Shelf shelf, PromotionResult promotionResult) {
+        if (requestFreeGet(promotionResult.getProductName(), promotionResult.getChangeCount())) {
+            shelf.takeOut(promotionResult.getProductName(), promotionResult.getChangeCount());
+        }
+    }
+
+    private boolean requestFreeGet(String productName, int additionalQuantityNeeded) {
+        String rawInputNoPromotion = inputView.requestFreePromotion(productName, additionalQuantityNeeded);
+        return new YesOrNoParser().parse(rawInputNoPromotion);
+    }
+
+    private void confirmPurchaseOrDiscard(Shelf shelf, List<Product> takenProducts, PromotionResult promotionResult) {
+        if (requestNoPromotionProduct(promotionResult.getProductName(), promotionResult.getChangeCount())) {
+            for (int i = promotionResult.getChangeCount(); i < 0; i++) {
+                shelf.add(takenProducts.removeLast());
+            }
+        }
+    }
+
+    private boolean requestNoPromotionProduct(String productName, int quantityNotApplied) {
+        String rawInputNoPromotion = new InputView().requestNoPromotion(productName, quantityNotApplied);
+        return new YesOrNoParser().parse(rawInputNoPromotion);
+    }
+
+    private boolean isNotChange(PromotionResult promotionResult) {
+        return promotionResult.checkType(PromotionResultType.NO_CHANGE)
+                || promotionResult.checkType(PromotionResultType.NO_CHANGE);
     }
 
     private Boolean askMembership() {
