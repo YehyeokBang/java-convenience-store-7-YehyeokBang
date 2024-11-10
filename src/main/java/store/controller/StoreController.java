@@ -9,9 +9,9 @@ import store.dto.DisplayProduct;
 import store.dto.ProductInfo;
 import store.dto.ReceiptData;
 import store.model.Customer;
-import store.model.YesOrNoParser;
+import store.model.parser.YesOrNoParser;
 import store.model.order.Order;
-import store.model.order.parser.OrderParser;
+import store.model.parser.Parser;
 import store.model.store.Membership;
 import store.model.store.Product;
 import store.model.store.Promotion;
@@ -28,9 +28,9 @@ public class StoreController {
 
     private final InputView inputView;
     private final OutputView outputView;
-    private final OrderParser<String> orderParser;
+    private final Parser<String, List<Order>> orderParser;
 
-    public StoreController(InputView inputView, OutputView outputView, OrderParser<String> orderParser) {
+    public StoreController(InputView inputView, OutputView outputView, Parser<String, List<Order>> orderParser) {
         this.inputView = inputView;
         this.outputView = outputView;
         this.orderParser = orderParser;
@@ -162,7 +162,8 @@ public class StoreController {
         List<ProductInfo> promotionProductInfos = new ArrayList<>();
         int totalPrice = getTotalPrice(groupedProducts);
         int totalQuantity = getTotalQuantity(groupedProducts);
-        int promotionDiscount = 0; int promotionAppliedAmount = 0;
+        int promotionDiscount = 0;
+        int promotionAppliedAmount = 0;
         for (Map.Entry<String, List<Product>> entry : groupedProducts.entrySet()) {
             String productName = entry.getKey();
             List<Product> productList = entry.getValue();
@@ -175,8 +176,10 @@ public class StoreController {
             if (product.hasPromotion()) {
                 Promotion promotion = product.getPromotion();
                 if (promotion.isApplicableToday()) {
-                    promotionGetQuantity = promotionQuantity / (promotion.getBuyQuantity() + promotion.getFreeQuantity());
-                    promotionAppliedAmount = promotionGetQuantity * (promotion.getBuyQuantity() + promotion.getFreeQuantity()) * price;
+                    promotionGetQuantity =
+                            promotionQuantity / (promotion.getBuyQuantity() + promotion.getFreeQuantity());
+                    promotionAppliedAmount =
+                            promotionGetQuantity * (promotion.getBuyQuantity() + promotion.getFreeQuantity()) * price;
                 }
             }
             productInfos.add(new ProductInfo(productName, price * quantity, quantity));

@@ -1,9 +1,11 @@
 package store;
 
 import camp.nextstep.edu.missionutils.Console;
+import java.util.List;
 import store.controller.StoreController;
-import store.model.order.parser.ConsoleOrderParser;
-import store.model.order.parser.OrderParser;
+import store.model.order.Order;
+import store.model.parser.ConsoleOrderParser;
+import store.model.parser.Parser;
 import store.view.InputView;
 import store.view.OutputView;
 
@@ -18,7 +20,7 @@ public class Application {
     private static StoreController initController() {
         InputView inputView = new InputView();
         OutputView outputView = new OutputView();
-        OrderParser<String> orderParser = new ConsoleOrderParser();
+        Parser<String, List<Order>> orderParser = new ConsoleOrderParser();
         return new StoreController(inputView, outputView, orderParser);
     }
 

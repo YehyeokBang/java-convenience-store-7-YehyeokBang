@@ -1,4 +1,4 @@
-package store.model.order.parser;
+package store.model.parser;
 
 import static store.message.InputErrorMessage.INVALID_FORMAT;
 import static store.message.InputErrorMessage.INVALID_INPUT;
@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import store.model.order.Order;
 
-public class ConsoleOrderParser implements OrderParser<String> {
+public class ConsoleOrderParser implements Parser<String, List<Order>> {
 
     private static final String ORDERS_SEPARATOR = ",";
     private static final String START_BRACKET = "[";

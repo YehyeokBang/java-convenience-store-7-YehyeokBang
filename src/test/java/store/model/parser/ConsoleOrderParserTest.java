@@ -1,4 +1,4 @@
-package store.model.order.parser;
+package store.model.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

@@ -1,10 +1,11 @@
-package store.model;
+package store.model.parser;
 
 import static store.message.InputErrorMessage.*;
 
-public class YesOrNoParser {
+public class YesOrNoParser implements Parser<String, Boolean> {
 
-    public boolean parse(String rawInput) {
+    @Override
+    public Boolean parse(String rawInput) {
         if (isYes(rawInput)) {
             return true;
         }
