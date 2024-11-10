@@ -3,6 +3,7 @@ package store.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 import store.dto.DisplayProduct;
 import store.dto.ProductInfo;
@@ -96,7 +97,7 @@ public class StoreController {
             return;
         }
         if (promotionResult.checkType(PromotionResultType.FREE_PRODUCT_AVAILABLE)) {
-            offerFreeProductIfAccepted(shelf, promotionResult);
+            offerFreeProductIfAccepted(shelf, takenProducts, promotionResult);
             return;
         }
         if (promotionResult.checkType(PromotionResultType.PROMOTION_INSUFFICIENT_STOCK)) {
@@ -104,9 +105,9 @@ public class StoreController {
         }
     }
 
-    private void offerFreeProductIfAccepted(Shelf shelf, PromotionResult promotionResult) {
+    private void offerFreeProductIfAccepted(Shelf shelf, List<Product> takenProducts, PromotionResult promotionResult) {
         if (requestFreeGet(promotionResult.getProductName(), promotionResult.getChangeCount())) {
-            shelf.takeOut(promotionResult.getProductName(), promotionResult.getChangeCount());
+            takenProducts.addAll(shelf.takeOut(promotionResult.getProductName(), promotionResult.getChangeCount()));
         }
     }
 
@@ -149,10 +150,10 @@ public class StoreController {
 
     private ReceiptData calculateProducts(List<Product> products, boolean isMembership) {
         Map<String, List<Product>> groupedProducts = products.stream()
-                .collect(Collectors.groupingBy(Product::getName));
+                .collect(Collectors.groupingBy(Product::getName, LinkedHashMap::new, Collectors.toList()));
 
         List<ProductInfo> productInfos = new ArrayList<>();
-        List<ProductInfo> promotionProducts = new ArrayList<>();
+        List<ProductInfo> promotionProductInfos = new ArrayList<>();
         int totalPrice = 0;
         int totalQuantity = 0;
         int promotionDiscount = 0;
@@ -160,12 +161,9 @@ public class StoreController {
         for (Map.Entry<String, List<Product>> entry : groupedProducts.entrySet()) {
             String productName = entry.getKey();
             List<Product> productList = entry.getValue();
-            List<Product> promotionProducts2 = productList.stream()
-                    .filter(Product::hasPromotion)
-                    .toList();
             Product product = productList.getFirst();
             int quantity = productList.size();
-            int quantity2 = promotionProducts2.size();
+            int quantity2 = getPromotionProductCount(productList);
             int price = product.getPrice();
 
             int promotionQuantity = 0;
@@ -180,10 +178,10 @@ public class StoreController {
             int productTotalPrice = price * quantity;
             totalPrice += productTotalPrice;
 
-            productInfos.add(new ProductInfo(productName, price, quantity));
+            productInfos.add(new ProductInfo(productName, productTotalPrice, quantity));
             if (promotionQuantity > 0) {
                 promotionDiscount = price * promotionQuantity;
-                promotionProducts.add(new ProductInfo(productName, price, promotionQuantity));
+                promotionProductInfos.add(new ProductInfo(productName, price, promotionQuantity));
             }
 
             totalQuantity += quantity;
@@ -194,13 +192,19 @@ public class StoreController {
         int finalPrice = totalPrice - membershipDiscountPrice - promotionDiscount;
         return new ReceiptData(
                 productInfos,
-                promotionProducts,
+                promotionProductInfos,
                 totalQuantity,
                 totalPrice,
                 promotionDiscount,
                 membershipDiscountPrice,
                 finalPrice
         );
+    }
+
+    private int getPromotionProductCount(List<Product> productList) {
+        return (int) productList.stream()
+                .filter(Product::hasPromotion)
+                .count();
     }
 
     private int getMembershipDiscountPrice(boolean isMembership, int totalPrice) {

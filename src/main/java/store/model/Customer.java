@@ -20,7 +20,7 @@ public class Customer {
     }
 
     public List<Product> unloadShoppingCart() {
-        List<Product> products = List.copyOf(shoppingCart);
+        List<Product> products = new ArrayList<>(shoppingCart);
         shoppingCart.clear();
         return products;
     }
