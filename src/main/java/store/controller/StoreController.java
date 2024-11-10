@@ -112,8 +112,10 @@ public class StoreController {
     }
 
     private boolean requestFreeGet(String productName, int additionalQuantityNeeded) {
-        String rawInputNoPromotion = inputView.requestFreePromotion(productName, additionalQuantityNeeded);
-        return new YesOrNoParser().parse(rawInputNoPromotion);
+        return RetryHandler.retryIfError(() -> {
+            String rawInputNoPromotion = inputView.requestFreePromotion(productName, additionalQuantityNeeded);
+            return new YesOrNoParser().parse(rawInputNoPromotion);
+        });
     }
 
     private void confirmPurchaseOrDiscard(Shelf shelf, List<Product> takenProducts, PromotionResult promotionResult) {
@@ -125,8 +127,10 @@ public class StoreController {
     }
 
     private boolean requestNoPromotionProduct(String productName, int quantityNotApplied) {
-        String rawInputNoPromotion = new InputView().requestNoPromotion(productName, quantityNotApplied);
-        return new YesOrNoParser().parse(rawInputNoPromotion);
+        return RetryHandler.retryIfError(() -> {
+            String rawInputNoPromotion = new InputView().requestNoPromotion(productName, quantityNotApplied);
+            return new YesOrNoParser().parse(rawInputNoPromotion);
+        });
     }
 
     private boolean isNotChange(PromotionResult promotionResult) {
