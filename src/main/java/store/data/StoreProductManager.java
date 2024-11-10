@@ -1,9 +1,13 @@
 package store.data;
 
+import static store.message.FileErrorMessage.EMPTY_PROMOTION;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import store.data.product.ProductData;
 import store.data.promotion.PromotionData;
 import store.model.store.Product;
@@ -22,72 +26,97 @@ public class StoreProductManager {
     }
 
     public List<ShelfLine> getProducts() {
-        List<ShelfLine> shelfLines = productDataProvider.getAll()
+        List<ShelfLine> initialShelfLines = createInitialShelfLines();
+        Map<String, List<ShelfLine>> productsByName = groupProductsByName(initialShelfLines);
+        List<ShelfLine> additionalProducts = createMissingNonPromotedProducts(productsByName);
+        return combineProducts(initialShelfLines, additionalProducts);
+    }
+
+    private List<ShelfLine> createInitialShelfLines() {
+        return productDataProvider.getAll()
                 .stream()
                 .map(this::createShelfLine)
                 .collect(Collectors.toList());
-        addMissingNonPromotedProducts(shelfLines);
-        return List.copyOf(shelfLines);
     }
 
     private ShelfLine createShelfLine(ProductData data) {
-        String name = data.name();
-        int price = data.price();
-        Promotion promotion = getPromotion(data.promotionName());
-
-        Deque<Product> products = new ArrayDeque<>();
-        for (int i = 0; i < data.quantity(); i++) {
-            products.addLast(new Product(name, price, promotion));
-        }
-        return new ShelfLine(products, name, price, promotion);
+        Promotion promotion = createPromotion(data.promotionName());
+        return new ShelfLine(
+                createProducts(data, promotion),
+                data.name(),
+                data.price(),
+                promotion
+        );
     }
 
-    private Promotion getPromotion(String promotionName) {
+    private Deque<Product> createProducts(ProductData data, Promotion promotion) {
+        return Stream.generate(() -> new Product(data.name(), data.price(), promotion))
+                .limit(data.quantity())
+                .collect(Collectors.toCollection(ArrayDeque::new));
+    }
+
+    private Promotion createPromotion(String promotionName) {
         if (promotionName.equals("null")) {
             return Promotion.getNoPromotion();
         }
-        PromotionData promotionData = findByName(promotionName);
-        return createPromotion(promotionData);
+        return createPromotionFromData(findPromotionData(promotionName));
     }
 
-    private PromotionData findByName(String promotionName) {
+    private PromotionData findPromotionData(String promotionName) {
         return promotionDataProvider.getAll()
                 .stream()
                 .filter(data -> data.name().equals(promotionName))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("존재하지 않는 프로모션입니다."));
+                .orElseThrow(() -> new IllegalStateException(EMPTY_PROMOTION.get()));
     }
 
-    private Promotion createPromotion(PromotionData promotionData) {
+    private Promotion createPromotionFromData(PromotionData data) {
         return new Promotion(
-                promotionData.name(),
-                promotionData.buyQuantity(),
-                promotionData.getQuantity(),
-                promotionData.startDate(),
-                promotionData.endDate()
+                data.name(),
+                data.buyQuantity(),
+                data.getQuantity(),
+                data.startDate(),
+                data.endDate()
         );
     }
 
-    private void addMissingNonPromotedProducts(List<ShelfLine> shelfLines) {
-        var productsByName = shelfLines.stream()
+    private Map<String, List<ShelfLine>> groupProductsByName(List<ShelfLine> shelfLines) {
+        return shelfLines.stream()
                 .collect(Collectors.groupingBy(ShelfLine::getProductName));
-
-        productsByName.forEach((productName, productLines) -> {
-            boolean hasPromotionProduct = productLines.stream()
-                    .anyMatch(line -> line.getPromotion().isValid());
-            boolean hasNormalProduct = productLines.stream()
-                    .anyMatch(line -> !line.getPromotion().isValid());
-
-            if (hasPromotionProduct && !hasNormalProduct) {
-                int price = productLines.getFirst().getPrice();
-                addNonPromotedProduct(shelfLines, productName, price);
-            }
-        });
     }
 
-    private void addNonPromotedProduct(List<ShelfLine> shelfLines, String productName, int price) {
-        Promotion promotion = Promotion.getNoPromotion();
-        Deque<Product> products = new ArrayDeque<>();
-        shelfLines.add(new ShelfLine(products, productName, price, promotion));
+    private List<ShelfLine> createMissingNonPromotedProducts(Map<String, List<ShelfLine>> productsByName) {
+        return productsByName.entrySet().stream()
+                .filter(this::needsNonPromotedProduct)
+                .map(this::createNonPromotedProduct)
+                .collect(Collectors.toList());
+    }
+
+    private boolean needsNonPromotedProduct(Map.Entry<String, List<ShelfLine>> entry) {
+        List<ShelfLine> productLines = entry.getValue();
+        return hasPromotionProduct(productLines) && !hasNormalProduct(productLines);
+    }
+
+    private boolean hasPromotionProduct(List<ShelfLine> productLines) {
+        return productLines.stream()
+                .anyMatch(line -> line.getPromotion().isValid());
+    }
+
+    private boolean hasNormalProduct(List<ShelfLine> productLines) {
+        return productLines.stream()
+                .anyMatch(line -> !line.getPromotion().isValid());
+    }
+
+    private ShelfLine createNonPromotedProduct(Map.Entry<String, List<ShelfLine>> entry) {
+        String productName = entry.getKey();
+        int price = entry.getValue()
+                .getFirst()
+                .getPrice();
+        return new ShelfLine(new ArrayDeque<>(), productName, price, Promotion.getNoPromotion());
+    }
+
+    private List<ShelfLine> combineProducts(List<ShelfLine> original, List<ShelfLine> additional) {
+        return Stream.concat(original.stream(), additional.stream())
+                .toList();
     }
 }

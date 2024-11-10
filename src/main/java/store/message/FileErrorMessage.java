@@ -10,6 +10,7 @@ public enum FileErrorMessage {
 
     // 프로모션 파일 관련 에러
     EMPTY_PROMOTION_NAME("프로모션 이름이 비어 있습니다."),
+    EMPTY_PROMOTION("존재하지 않는 프로모션입니다."),
     INVALID_PROMOTION_DATE_FORMAT("프로모션 날짜 형식이 잘못되었습니다. (올바른 형식: YYYY-MM-DD)"),
     INVALID_PROMOTION_DATE_ORDER("프로모션의 시작 날짜가 종료 날짜보다 늦습니다."),
     INVALID_PROMOTION_GET_AMOUNT("프로모션 '증정 수량'이 1이 아닙니다."),
