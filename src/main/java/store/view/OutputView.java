@@ -1,8 +1,6 @@
 package store.view;
 
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 import store.dto.DisplayProduct;
 import store.dto.ProductInfo;
 import store.dto.ReceiptData;
@@ -11,8 +9,9 @@ public class OutputView {
 
     private static final String WELCOME_MESSAGE = "안녕하세요. W편의점입니다.";
     private static final String CURRENT_PRODUCTS_MESSAGE = "현재 보유하고 있는 상품입니다.";
+    private static final String PRODUCT_INFO_MESSAGE = "- %s %s원 %s";
+    private static final String PROMOTION_PRODUCT_INFO_MESSAGE = "- %s %s원 %s %s";
     private static final String NO_PROMOTION = "null";
-    private static final String NOTHING = "";
     private static final String NO_STOCK = "재고 없음";
     private static final String RECEIPT_HEADER = "==============W 편의점================\n";
     private static final String PRODUCT_HEADER = String.format("%-8s\t\t\t%-2s\t\t%s\n", "상품명", "수량", "금액");
@@ -27,50 +26,49 @@ public class OutputView {
     }
 
     public void printCurrentProductsMessage() {
-        System.out.println(CURRENT_PRODUCTS_MESSAGE);
+        System.out.println(CURRENT_PRODUCTS_MESSAGE + System.lineSeparator());
     }
 
     public void printDisplayProducts(List<DisplayProduct> displayProducts) {
-        StringBuilder message = new StringBuilder(System.lineSeparator());
-        for (DisplayProduct displayProduct : displayProducts) {
-            message.append(formatName(displayProduct))
-                    .append(formatPrice(displayProduct))
-                    .append(formatQuantity(displayProduct))
-                    .append(formatPromotion(displayProduct))
-                    .append(System.lineSeparator());
+        for (DisplayProduct product : displayProducts) {
+            if (isPromotionProduct(product)) {
+                System.out.println(getPromotionProductInfo(product));
+                continue;
+            }
+            System.out.println(getProductInfo(product));
         }
-        System.out.println(message);
     }
 
-    private String formatName(DisplayProduct displayProduct) {
-        String nameFormat = "- %s ";
-        return String.format(nameFormat, displayProduct.name());
+    private String getProductInfo(DisplayProduct displayProduct) {
+        return String.format(PRODUCT_INFO_MESSAGE,
+                displayProduct.name(),
+                formatPrice(displayProduct),
+                formatQuantity(displayProduct)
+        );
+    }
+
+    private String getPromotionProductInfo(DisplayProduct product) {
+        return String.format(PROMOTION_PRODUCT_INFO_MESSAGE,
+                product.name(),
+                formatPrice(product),
+                formatQuantity(product),
+                product.promotion()
+        );
     }
 
     private String formatPrice(DisplayProduct displayProduct) {
-        NumberFormat numberFormat = NumberFormat.getInstance(Locale.KOREA);
-        String priceFormat = "%s원 ";
-        return String.format(priceFormat, numberFormat.format(displayProduct.price()));
+        return String.format("%,d", displayProduct.price());
     }
 
     private String formatQuantity(DisplayProduct displayProduct) {
         if (displayProduct.quantity() == 0) {
             return NO_STOCK;
         }
-        String quantityFormat = "%s개";
-        return String.format(quantityFormat, displayProduct.quantity());
+        return displayProduct.quantity() + "개";
     }
 
-    private String formatPromotion(DisplayProduct displayProduct) {
-        if (isNoPromotion(displayProduct)) {
-            return NOTHING;
-        }
-        String promotionNameFormat = " %s";
-        return String.format(promotionNameFormat, displayProduct.promotion());
-    }
-
-    private boolean isNoPromotion(DisplayProduct displayProduct) {
-        return displayProduct.promotion()
+    private boolean isPromotionProduct(DisplayProduct displayProduct) {
+        return !displayProduct.promotion()
                 .equals(NO_PROMOTION);
     }
 
