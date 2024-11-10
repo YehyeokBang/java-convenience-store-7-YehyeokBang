@@ -58,7 +58,7 @@ public class Shelf {
     }
 
     private String getPromotionName(ShelfLine line) {
-        String promotionName = "";
+        String promotionName = "null";
         if (line.getPromotion().isValid()) {
             promotionName = line.getPromotion().getName();
         }

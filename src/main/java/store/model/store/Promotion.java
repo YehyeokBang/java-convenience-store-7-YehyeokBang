@@ -6,7 +6,7 @@ import java.time.LocalDate;
 public class Promotion {
 
     private static final Promotion NO_PROMOTION = new Promotion(
-            null, 0, 0,
+            "null", 0, 0,
             LocalDate.MAX, LocalDate.MIN
     );
 

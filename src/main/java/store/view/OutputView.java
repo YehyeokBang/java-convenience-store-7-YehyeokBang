@@ -13,7 +13,7 @@ public class OutputView {
     private static final String CURRENT_PRODUCTS_MESSAGE = "현재 보유하고 있는 상품입니다.";
     private static final String NO_PROMOTION = "null";
     private static final String NOTHING = "";
-    private static final String NO_STOCK = "재고 없음 ";
+    private static final String NO_STOCK = "재고 없음";
     private static final String RECEIPT_HEADER = "==============W 편의점================\n";
     private static final String PRODUCT_HEADER = String.format("%-8s\t\t\t%-2s\t\t%s\n", "상품명", "수량", "금액");
     private static final String PROMOTION_HEADER = "=============증\t\t정===============\n";
@@ -42,31 +42,36 @@ public class OutputView {
         System.out.println(message);
     }
 
-    private String formatPromotion(DisplayProduct displayProduct) {
-        if (isPromotion(displayProduct)) {
-            return NOTHING;
-        }
-        return displayProduct.promotion();
-    }
-
-    private boolean isPromotion(DisplayProduct displayProduct) {
-        return displayProduct.promotion().equals(NO_PROMOTION);
-    }
-
     private String formatName(DisplayProduct displayProduct) {
-        return "- " + displayProduct.name() + " ";
+        String nameFormat = "- %s ";
+        return String.format(nameFormat, displayProduct.name());
     }
 
     private String formatPrice(DisplayProduct displayProduct) {
         NumberFormat numberFormat = NumberFormat.getInstance(Locale.KOREA);
-        return numberFormat.format(displayProduct.price()) + "원 ";
+        String priceFormat = "%s원 ";
+        return String.format(priceFormat, numberFormat.format(displayProduct.price()));
     }
 
     private String formatQuantity(DisplayProduct displayProduct) {
         if (displayProduct.quantity() == 0) {
             return NO_STOCK;
         }
-        return displayProduct.quantity() + "개 ";
+        String quantityFormat = "%s개";
+        return String.format(quantityFormat, displayProduct.quantity());
+    }
+
+    private String formatPromotion(DisplayProduct displayProduct) {
+        if (isNoPromotion(displayProduct)) {
+            return NOTHING;
+        }
+        String promotionNameFormat = " %s";
+        return String.format(promotionNameFormat, displayProduct.promotion());
+    }
+
+    private boolean isNoPromotion(DisplayProduct displayProduct) {
+        return displayProduct.promotion()
+                .equals(NO_PROMOTION);
     }
 
     public void printReceipt(ReceiptData receiptData) {
