@@ -153,8 +153,7 @@ public class StoreController {
     }
 
     private ReceiptData calculateProducts(List<Product> products, boolean isMembership) {
-        Map<String, List<Product>> groupedProducts = products.stream()
-                .collect(Collectors.groupingBy(Product::getName, LinkedHashMap::new, Collectors.toList()));
+        Map<String, List<Product>> groupedProducts = getProductsGroupingByName(products);
 
         List<ProductInfo> productInfos = new ArrayList<>();
         List<ProductInfo> promotionProductInfos = new ArrayList<>();
@@ -187,22 +186,18 @@ public class StoreController {
                 promotionDiscount += price * promotionQuantity;
                 promotionProductInfos.add(new ProductInfo(productName, price, promotionQuantity));
             }
-
             totalQuantity += quantity;
         }
 
-        int membershipDiscountPrice = getMembershipDiscountPrice(isMembership, totalPrice);
-
+        int membershipDiscountPrice = getMembershipDiscountPrice(isMembership, totalPrice, promotionDiscount);
         int finalPrice = totalPrice - membershipDiscountPrice - promotionDiscount;
-        return new ReceiptData(
-                productInfos,
-                promotionProductInfos,
-                totalQuantity,
-                totalPrice,
-                promotionDiscount,
-                membershipDiscountPrice,
-                finalPrice
-        );
+        return new ReceiptData(productInfos, promotionProductInfos, totalQuantity, totalPrice, promotionDiscount,
+                membershipDiscountPrice, finalPrice);
+    }
+
+    private LinkedHashMap<String, List<Product>> getProductsGroupingByName(List<Product> products) {
+        return products.stream()
+                .collect(Collectors.groupingBy(Product::getName, LinkedHashMap::new, Collectors.toList()));
     }
 
     private int getPromotionProductCount(List<Product> productList) {
@@ -211,8 +206,8 @@ public class StoreController {
                 .count();
     }
 
-    private int getMembershipDiscountPrice(boolean isMembership, int totalPrice) {
-        return new Membership().getMembershipDiscountPrice(isMembership, totalPrice);
+    private int getMembershipDiscountPrice(boolean isMembership, int totalPrice, int promotionDiscount) {
+        return new Membership().getMembershipDiscountPrice(isMembership, totalPrice, promotionDiscount);
     }
 
     private void printReceipt(ReceiptData receiptData) {

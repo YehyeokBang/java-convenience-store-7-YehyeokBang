@@ -7,9 +7,10 @@ public class Membership {
     private static final int MIN_TOTAL_PRICE_FOR_DISCOUNT = 10_000;
     private static final int NO_DISCOUNT = 0;
 
-    public int getMembershipDiscountPrice(boolean isMembership, int totalPrice) {
+    public int getMembershipDiscountPrice(boolean isMembership, int totalPrice, int promotionDiscountAmount) {
         if (isPossibleDiscount(isMembership, totalPrice)) {
-            int membershipDiscountPrice = calculateDiscountAmount(totalPrice);
+            int appliedAmount = totalPrice - promotionDiscountAmount;
+            int membershipDiscountPrice = calculateDiscountAmount(appliedAmount);
             return ensureMinimumPayment(totalPrice, membershipDiscountPrice);
         }
         return NO_DISCOUNT;
