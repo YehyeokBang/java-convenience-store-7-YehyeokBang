@@ -3,6 +3,7 @@ package store.data;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.stream.Collectors;
 import store.data.product.ProductData;
 import store.data.promotion.PromotionData;
 import store.model.store.Product;
@@ -21,10 +22,12 @@ public class StoreProductManager {
     }
 
     public List<ShelfLine> getProducts() {
-        return productDataProvider.getAll()
+        List<ShelfLine> shelfLines = productDataProvider.getAll()
                 .stream()
                 .map(this::createShelfLine)
-                .toList();
+                .collect(Collectors.toList());
+        addMissingNonPromotedProducts(shelfLines);
+        return List.copyOf(shelfLines);
     }
 
     private ShelfLine createShelfLine(ProductData data) {
@@ -63,5 +66,28 @@ public class StoreProductManager {
                 promotionData.startDate(),
                 promotionData.endDate()
         );
+    }
+
+    private void addMissingNonPromotedProducts(List<ShelfLine> shelfLines) {
+        var productsByName = shelfLines.stream()
+                .collect(Collectors.groupingBy(ShelfLine::getProductName));
+
+        productsByName.forEach((productName, productLines) -> {
+            boolean hasPromotionProduct = productLines.stream()
+                    .anyMatch(line -> line.getPromotion().isValid());
+            boolean hasNormalProduct = productLines.stream()
+                    .anyMatch(line -> !line.getPromotion().isValid());
+
+            if (hasPromotionProduct && !hasNormalProduct) {
+                int price = productLines.getFirst().getPrice();
+                addNonPromotedProduct(shelfLines, productName, price);
+            }
+        });
+    }
+
+    private void addNonPromotedProduct(List<ShelfLine> shelfLines, String productName, int price) {
+        Promotion promotion = Promotion.getNoPromotion();
+        Deque<Product> products = new ArrayDeque<>();
+        shelfLines.add(new ShelfLine(products, productName, price, promotion));
     }
 }
