@@ -6,24 +6,29 @@ public class StoreStaff {
 
     public PromotionResult evaluatePromotion(List<Product> takenProducts, Shelf shelf) {
         List<Product> promotionProducts = filterValidPromotionProducts(takenProducts);
-        if (isChoiceAvailableWithPromotion(promotionProducts)) {
-            Promotion promotion = promotionProducts.getFirst().getPromotion();
-            int remainingQuantity = calculateRemainingQuantityForPromotion(promotionProducts.size(), promotion);
-            if (remainingQuantity >= promotion.getBuyQuantity()) {
-                return processFreeProductAvailable(takenProducts, promotionProducts, promotion, remainingQuantity, shelf);
-            }
-            return processPromotionInsufficientStock(takenProducts, promotionProducts, remainingQuantity);
-        }
-        return PromotionResult.createNoChange();
-    }
-
-    private boolean isChoiceAvailableWithPromotion(List<Product> promotionProducts) {
         if (promotionProducts.isEmpty()) {
-            return false;
+            return PromotionResult.createNoChange();
         }
         Promotion promotion = promotionProducts.getFirst().getPromotion();
-        int remainingQuantity = calculateRemainingQuantityForPromotion(promotionProducts.size(), promotion);
-        return !isFullPromotion(remainingQuantity);
+        int totalQuantity = promotionProducts.size();
+        if (isFullPromotionApplicable(totalQuantity, promotion) || totalQuantity < promotion.getBuyQuantity()) {
+            return PromotionResult.createNoChange();
+        }
+        return evaluatePromotionResult(takenProducts, shelf, totalQuantity, promotion, promotionProducts);
+    }
+
+    private PromotionResult evaluatePromotionResult(List<Product> takenProducts, Shelf shelf, int totalQuantity,
+                                                    Promotion promotion, List<Product> promotionProducts) {
+        int remainingQuantity = calculateRemainingQuantityForPromotion(totalQuantity, promotion);
+        if (remainingQuantity >= promotion.getBuyQuantity()) {
+            return processFreeProductAvailable(takenProducts, promotionProducts, promotion, remainingQuantity, shelf);
+        }
+        return processPromotionInsufficientStock(takenProducts, promotionProducts, remainingQuantity);
+    }
+
+    private boolean isFullPromotionApplicable(int totalQuantity, Promotion promotion) {
+        int promotionUnit = promotion.getBuyQuantity() + promotion.getFreeQuantity();
+        return totalQuantity % promotionUnit == 0;
     }
 
     private List<Product> filterValidPromotionProducts(List<Product> products) {
@@ -39,10 +44,6 @@ public class StoreStaff {
 
     private int calculateRemainingQuantityForPromotion(int totalPromotionQuantity, Promotion promotion) {
         return totalPromotionQuantity % (promotion.getBuyQuantity() + promotion.getFreeQuantity());
-    }
-
-    private boolean isFullPromotion(int remainingQuantity) {
-        return remainingQuantity == 0;
     }
 
     private PromotionResult processFreeProductAvailable(List<Product> takenProducts, List<Product> promotionProducts,

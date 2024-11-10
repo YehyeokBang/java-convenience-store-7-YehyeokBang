@@ -148,50 +148,61 @@ public class StoreController {
     }
 
     private void printReceipt(List<Product> products, boolean isMembership) {
-        ReceiptData receiptData = calculateProducts(products, isMembership);
+        ReceiptData receiptData = createReceiptData(products, isMembership);
         printReceipt(receiptData);
     }
 
-    private ReceiptData calculateProducts(List<Product> products, boolean isMembership) {
+    private ReceiptData createReceiptData(List<Product> products, boolean isMembership) {
         Map<String, List<Product>> groupedProducts = getProductsGroupingByName(products);
+        return calculatePayments(isMembership, groupedProducts);
+    }
 
+    private ReceiptData calculatePayments(boolean isMembership, Map<String, List<Product>> groupedProducts) {
         List<ProductInfo> productInfos = new ArrayList<>();
         List<ProductInfo> promotionProductInfos = new ArrayList<>();
-        int totalPrice = 0;
-        int totalQuantity = 0;
-        int promotionDiscount = 0;
-        int promotionAppliedAmount = 0;
+        int totalPrice = getTotalPrice(groupedProducts);
+        int totalQuantity = getTotalQuantity(groupedProducts);
+        int promotionDiscount = 0; int promotionAppliedAmount = 0;
         for (Map.Entry<String, List<Product>> entry : groupedProducts.entrySet()) {
             String productName = entry.getKey();
             List<Product> productList = entry.getValue();
             Product product = productList.getFirst();
             int quantity = productList.size();
-            int quantity2 = getPromotionProductCount(productList);
+            int promotionQuantity = getPromotionProductCount(productList);
             int price = product.getPrice();
 
-            int promotionQuantity = 0;
+            int promotionGetQuantity = 0;
             if (product.hasPromotion()) {
                 Promotion promotion = product.getPromotion();
                 if (promotion.isApplicableToday()) {
-                    int buyQuantity = promotion.getBuyQuantity();
-                    int freeQuantity = promotion.getFreeQuantity();
-                    promotionQuantity = quantity2 / (buyQuantity + freeQuantity);
-                    promotionAppliedAmount = promotionQuantity * (buyQuantity + freeQuantity) * price;
+                    promotionGetQuantity = promotionQuantity / (promotion.getBuyQuantity() + promotion.getFreeQuantity());
+                    promotionAppliedAmount = promotionGetQuantity * (promotion.getBuyQuantity() + promotion.getFreeQuantity()) * price;
                 }
             }
-            int productTotalPrice = price * quantity;
-            totalPrice += productTotalPrice;
-            productInfos.add(new ProductInfo(productName, productTotalPrice, quantity));
-            if (promotionQuantity > 0) {
-                promotionDiscount += price * promotionQuantity;
-                promotionProductInfos.add(new ProductInfo(productName, price, promotionQuantity));
+            productInfos.add(new ProductInfo(productName, price * quantity, quantity));
+            if (promotionGetQuantity > 0) {
+                promotionDiscount += price * promotionGetQuantity;
+                promotionProductInfos.add(new ProductInfo(productName, price, promotionGetQuantity));
             }
-            totalQuantity += quantity;
         }
         int membershipDiscountPrice = getMembershipDiscountPrice(isMembership, totalPrice - promotionAppliedAmount);
         int finalPrice = totalPrice - membershipDiscountPrice - promotionDiscount;
         return new ReceiptData(productInfos, promotionProductInfos, totalQuantity, totalPrice, promotionDiscount,
                 membershipDiscountPrice, finalPrice);
+    }
+
+    private int getTotalPrice(Map<String, List<Product>> groupedProducts) {
+        return groupedProducts.values()
+                .stream()
+                .mapToInt(products -> products.getFirst().getPrice() * products.size())
+                .sum();
+    }
+
+    private int getTotalQuantity(Map<String, List<Product>> groupedProducts) {
+        return groupedProducts.values()
+                .stream()
+                .mapToInt(List::size)
+                .sum();
     }
 
     private LinkedHashMap<String, List<Product>> getProductsGroupingByName(List<Product> products) {
