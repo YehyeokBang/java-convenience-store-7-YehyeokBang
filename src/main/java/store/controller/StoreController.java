@@ -160,7 +160,7 @@ public class StoreController {
         int totalPrice = 0;
         int totalQuantity = 0;
         int promotionDiscount = 0;
-
+        int promotionAppliedAmount = 0;
         for (Map.Entry<String, List<Product>> entry : groupedProducts.entrySet()) {
             String productName = entry.getKey();
             List<Product> productList = entry.getValue();
@@ -176,11 +176,11 @@ public class StoreController {
                     int buyQuantity = promotion.getBuyQuantity();
                     int freeQuantity = promotion.getFreeQuantity();
                     promotionQuantity = quantity2 / (buyQuantity + freeQuantity);
+                    promotionAppliedAmount = promotionQuantity * (buyQuantity + freeQuantity) * price;
                 }
             }
             int productTotalPrice = price * quantity;
             totalPrice += productTotalPrice;
-
             productInfos.add(new ProductInfo(productName, productTotalPrice, quantity));
             if (promotionQuantity > 0) {
                 promotionDiscount += price * promotionQuantity;
@@ -188,8 +188,7 @@ public class StoreController {
             }
             totalQuantity += quantity;
         }
-
-        int membershipDiscountPrice = getMembershipDiscountPrice(isMembership, totalPrice, promotionDiscount);
+        int membershipDiscountPrice = getMembershipDiscountPrice(isMembership, totalPrice - promotionAppliedAmount);
         int finalPrice = totalPrice - membershipDiscountPrice - promotionDiscount;
         return new ReceiptData(productInfos, promotionProductInfos, totalQuantity, totalPrice, promotionDiscount,
                 membershipDiscountPrice, finalPrice);
@@ -206,8 +205,8 @@ public class StoreController {
                 .count();
     }
 
-    private int getMembershipDiscountPrice(boolean isMembership, int totalPrice, int promotionDiscount) {
-        return new Membership().getMembershipDiscountPrice(isMembership, totalPrice, promotionDiscount);
+    private int getMembershipDiscountPrice(boolean isMembership, int totalPrice) {
+        return new Membership().getMembershipDiscountPrice(isMembership, totalPrice);
     }
 
     private void printReceipt(ReceiptData receiptData) {

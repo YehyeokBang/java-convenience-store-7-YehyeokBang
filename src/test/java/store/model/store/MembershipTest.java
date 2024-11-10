@@ -15,43 +15,28 @@ class MembershipTest {
     @ValueSource(ints = {0, 1_000, 10_000})
     void shouldReturnZero_WhenMembershipNotSelected(int totalPrice) {
         Membership membership = new Membership();
-        int promotionDiscount = 0;
 
-        int membershipDiscountPrice = membership.getMembershipDiscountPrice(false, totalPrice, promotionDiscount);
+        int membershipDiscountPrice = membership.getMembershipDiscountPrice(false, totalPrice);
         assertEquals(0, membershipDiscountPrice);
     }
 
-    @DisplayName("멤버십 할인을 선택하였으나, 총구매액이 10,000원 이하인 경우 멤버십 할인 금액은 0원이다.")
-    @ParameterizedTest(name = "멤버십: O, 총구매액: {0}원")
-    @ValueSource(ints = {0, 1_000, 10_000})
-    void shouldReturnZero_WhenTotalPriceIsBelowMinimumForDiscount(int totalPrice) {
+    @DisplayName("멤버십 할인이 적용된다. (프로모션 적용 상품 없음)")
+    @ParameterizedTest(name = "멤버십: O, 총구매액: {0}원, 할인금액: {1}원")
+    @CsvSource({"10_000, 3_000", "20_000, 6_000", "1_000_000, 8_000"})
+    void shouldReturnZero_WhenTotalPriceIsBelowMinimumForDiscount(int totalPrice, int discountAmount) {
         Membership membership = new Membership();
-        int promotionDiscount = 0;
 
-        int membershipDiscountPrice = membership.getMembershipDiscountPrice(true, totalPrice, promotionDiscount);
-        assertEquals(0, membershipDiscountPrice);
+        int membershipDiscountPrice = membership.getMembershipDiscountPrice(true, totalPrice);
+        assertEquals(discountAmount, membershipDiscountPrice);
     }
 
-    @DisplayName("멤버십 할인을 적용한 후 총 지불액이 최소 지불 금액인 10,000원을 넘지 않도록 조정된다.")
-    @ParameterizedTest(name = "멤버십: O, 총구매액: {0}원, 할인 적용 후 지불액: {1}원")
-    @CsvSource({"11_000, 10_000", "13_000, 10_000", "15_000, 10_500"})
-    void shouldAdjustDiscountToMaintainMinimumTotalPayment(int totalPrice, int expectedFinalPriceAfterDiscount) {
-        Membership membership = new Membership();
-        int promotionDiscount = 0;
-
-        int membershipDiscountPrice = membership.getMembershipDiscountPrice(true, totalPrice, promotionDiscount);
-        int finalPriceAfterDiscount = totalPrice - membershipDiscountPrice;
-        assertEquals(expectedFinalPriceAfterDiscount, finalPriceAfterDiscount);
-    }
-
-    @DisplayName("멤버십 할인을 적용한 후 총 지불액이 최소 지불 금액인 10,000원을 넘지 않도록 조정된다. (프로모션 O)")
-    @ParameterizedTest(name = "멤버십: O, 총구매액: {0}원, 프로모션 적용금액: {1}원, 할인 적용 후 지불액: {2}원")
-    @CsvSource({"13_000, 1_000, 10_000"})
-    void shouldAdjustDiscountToMaintainMinimumTotalPayment(int totalPrice, int promotionDiscountAmount, int expectedFinalPriceAfterDiscount) {
+    @DisplayName("멤버십 할인이 적용된다. (프로모션 적용 상품 있음)")
+    @ParameterizedTest(name = "멤버십: O, 프로모션 금액: {0}원, 총구매액: {1}원, 할인금액: {2}원")
+    @CsvSource({"3_000, 13_000, 3_000", "2_000, 2_000, 0", "0, 100_000, 8_000"})
+    void shouldAdjustDiscountToMaintainMinimumTotalPayment(int promotionAmount, int totalPrice, int discountAmount) {
         Membership membership = new Membership();
 
-        int membershipDiscountPrice = membership.getMembershipDiscountPrice(true, totalPrice, promotionDiscountAmount);
-        int finalPriceAfterDiscount = totalPrice - membershipDiscountPrice;
-        assertEquals(expectedFinalPriceAfterDiscount, finalPriceAfterDiscount);
+        int membershipDiscountPrice = membership.getMembershipDiscountPrice(true, totalPrice - promotionAmount);
+        assertEquals(discountAmount, membershipDiscountPrice);
     }
 }
