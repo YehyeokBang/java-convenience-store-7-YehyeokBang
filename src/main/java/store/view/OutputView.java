@@ -11,13 +11,13 @@ public class OutputView {
 
     private static final String WELCOME_MESSAGE = "안녕하세요. W편의점입니다.";
     private static final String CURRENT_PRODUCTS_MESSAGE = "현재 보유하고 있는 상품입니다.";
-    private static final String RECEIPT_HEADER = "===========W 편의점=============\n";
-    private static final String PRODUCT_HEADER = String.format("%-8s\t\t%-2s\t\t%s\n", "상품명", "수량", "금액");
-    private static final String PROMOTION_HEADER = "===========증\t정=============\n";
-    private static final String TOTAL_LABEL = "%-8s\t\t%-2s\t\t%,d\n";
-    private static final String DISCOUNT_LABEL = "%-10s\t\t\t-%,d\n";
-    private static final String TOTAL_PRICE_LABEL = "%-10s\t\t\t%,d\n";
-    private static final String RECEIPT_FOOTER = "==============================\n";
+    private static final String RECEIPT_HEADER = "==============W 편의점================\n";
+    private static final String PRODUCT_HEADER = String.format("%-8s\t\t\t%-2s\t\t%s\n", "상품명", "수량", "금액");
+    private static final String PROMOTION_HEADER = "=============증\t\t정===============\n";
+    private static final String TOTAL_LABEL = "%-8s\t\t\t%-2s\t\t%,d\n";
+    private static final String DISCOUNT_LABEL = "%-10s\t\t\t\t-%,d\n";
+    private static final String TOTAL_PRICE_LABEL = "%-10s\t\t\t\t %,d\n";
+    private static final String RECEIPT_FOOTER = "====================================\n";
 
     public void printWelcomeMessage() {
         System.out.println(WELCOME_MESSAGE);
@@ -74,7 +74,7 @@ public class OutputView {
         receipt.append(RECEIPT_HEADER);
         receipt.append(PRODUCT_HEADER);
         for (ProductInfo info : receiptData.products()) {
-            receipt.append(String.format("%-8s\t\t%-2d\t\t%,d\n", info.name(), info.quantity(), info.price()));
+            receipt.append(String.format("%-8s\t\t\t%-2d\t\t%,d\n", info.name(), info.quantity(), info.price()));
         }
     }
 
@@ -83,7 +83,7 @@ public class OutputView {
         if (!promotionProducts.isEmpty()) {
             receipt.append(PROMOTION_HEADER);
             for (ProductInfo info : promotionProducts) {
-                receipt.append(String.format("%-8s\t\t%-2d\n", info.name(), info.quantity()));
+                receipt.append(String.format("%-8s\t\t\t%-2d\n", info.name(), info.quantity()));
             }
         }
     }
