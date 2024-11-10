@@ -1,5 +1,6 @@
 package store;
 
+import camp.nextstep.edu.missionutils.Console;
 import store.controller.StoreController;
 import store.model.order.parser.ConsoleOrderParser;
 import store.model.order.parser.OrderParser;
@@ -11,6 +12,7 @@ public class Application {
     public static void main(String[] args) {
         StoreController storeController = initController();
         storeController.start();
+        releaseResources();
     }
 
     private static StoreController initController() {
@@ -18,5 +20,9 @@ public class Application {
         OutputView outputView = new OutputView();
         OrderParser<String> orderParser = new ConsoleOrderParser();
         return new StoreController(inputView, outputView, orderParser);
+    }
+
+    private static void releaseResources() {
+        Console.close();
     }
 }
