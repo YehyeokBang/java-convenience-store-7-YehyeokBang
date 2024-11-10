@@ -1,6 +1,7 @@
 package store;
 
 import camp.nextstep.edu.missionutils.test.NsTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -58,6 +59,16 @@ class ApplicationTest extends NsTest {
         assertSimpleTest(() -> {
             runException("[컵라면-12]", "N", "N");
             assertThat(output()).contains("[ERROR] 재고 수량을 초과하여 구매할 수 없습니다. 다시 입력해 주세요.");
+        });
+    }
+
+    @DisplayName("프로모션 재고가 부족한 경우 안내한다.")
+    @Test
+    void shouldThrowException_WhenPromotionStockIsInsufficient() {
+        assertSimpleTest(() -> {
+            runException("[콜라-11]", "Y", "N");
+            assertThat(output()).contains("현재 콜라 2개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)");
+            assertThat(output().replaceAll("\\s", "")).contains("내실돈8,000");
         });
     }
 
