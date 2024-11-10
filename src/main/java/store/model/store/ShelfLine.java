@@ -50,4 +50,8 @@ public class ShelfLine {
     public int getPrice() {
         return price;
     }
+
+    public int getCount() {
+        return products.size();
+    }
 }

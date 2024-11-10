@@ -85,7 +85,7 @@ public class StoreController {
         for (Order order : orders) {
             customer.addProductsInShoppingCart(shelf, order);
             List<Product> takenProducts = customer.unloadShoppingCart();
-            PromotionResult promotionResult = storeStaff.evaluatePromotion(takenProducts);
+            PromotionResult promotionResult = storeStaff.evaluatePromotion(takenProducts, shelf);
             processPromotionChange(shelf, takenProducts, promotionResult);
             products.addAll(takenProducts);
         }
@@ -119,8 +119,8 @@ public class StoreController {
     }
 
     private void confirmPurchaseOrDiscard(Shelf shelf, List<Product> takenProducts, PromotionResult promotionResult) {
-        if (requestNoPromotionProduct(promotionResult.getProductName(), promotionResult.getChangeCount())) {
-            for (int i = promotionResult.getChangeCount(); i < 0; i++) {
+        if (!requestNoPromotionProduct(promotionResult.getProductName(), promotionResult.getChangeCount())) {
+            for (int i = 0; i < promotionResult.getChangeCount(); i++) {
                 shelf.add(takenProducts.removeLast());
             }
         }
@@ -184,7 +184,7 @@ public class StoreController {
 
             productInfos.add(new ProductInfo(productName, productTotalPrice, quantity));
             if (promotionQuantity > 0) {
-                promotionDiscount = price * promotionQuantity;
+                promotionDiscount += price * promotionQuantity;
                 promotionProductInfos.add(new ProductInfo(productName, price, promotionQuantity));
             }
 

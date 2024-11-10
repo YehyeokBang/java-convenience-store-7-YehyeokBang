@@ -4,13 +4,13 @@ import java.util.List;
 
 public class StoreStaff {
 
-    public PromotionResult evaluatePromotion(List<Product> takenProducts) {
+    public PromotionResult evaluatePromotion(List<Product> takenProducts, Shelf shelf) {
         List<Product> promotionProducts = filterValidPromotionProducts(takenProducts);
         if (isChoiceAvailableWithPromotion(promotionProducts)) {
             Promotion promotion = promotionProducts.getFirst().getPromotion();
             int remainingQuantity = calculateRemainingQuantityForPromotion(promotionProducts.size(), promotion);
             if (remainingQuantity >= promotion.getBuyQuantity()) {
-                return processFreeProductAvailable(promotionProducts, promotion, remainingQuantity);
+                return processFreeProductAvailable(takenProducts, promotionProducts, promotion, remainingQuantity, shelf);
             }
             return processPromotionInsufficientStock(takenProducts, promotionProducts, remainingQuantity);
         }
@@ -45,11 +45,18 @@ public class StoreStaff {
         return remainingQuantity == 0;
     }
 
-    private PromotionResult processFreeProductAvailable(List<Product> promotionProducts, Promotion promotion,
-                                                        int remainingQuantity) {
+    private PromotionResult processFreeProductAvailable(List<Product> takenProducts, List<Product> promotionProducts,
+                                                        Promotion promotion, int remainingQuantity, Shelf shelf) {
         String productName = promotionProducts.getFirst().getName();
         int additionalQuantityNeeded = calculateAdditionalQuantityNeeded(promotion, remainingQuantity);
+        if (isPromotionStockInsufficient(shelf, productName, additionalQuantityNeeded)) {
+            return processPromotionInsufficientStock(takenProducts, promotionProducts, remainingQuantity);
+        }
         return PromotionResult.createFreeProductAvailable(productName, additionalQuantityNeeded);
+    }
+
+    private boolean isPromotionStockInsufficient(Shelf shelf, String productName, int additionalQuantityNeeded) {
+        return shelf.countPromotionProductByName(productName) < additionalQuantityNeeded;
     }
 
     private int calculateAdditionalQuantityNeeded(Promotion promotion, int remainingQuantity) {
@@ -58,10 +65,9 @@ public class StoreStaff {
 
     private PromotionResult processPromotionInsufficientStock(List<Product> takenProducts,
                                                               List<Product> promotionProducts, int remainingQuantity) {
-        Promotion promotion = promotionProducts.getFirst().getPromotion();
         String productName = promotionProducts.getFirst().getName();
         int normalProductsCount = getNormalProductsCount(takenProducts);
-        int quantityNotApplied = promotion.getBuyQuantity() - remainingQuantity + normalProductsCount;
+        int quantityNotApplied = remainingQuantity + normalProductsCount;
         return PromotionResult.createPromotionInsufficientStock(productName, quantityNotApplied);
     }
 

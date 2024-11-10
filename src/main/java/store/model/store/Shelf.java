@@ -24,12 +24,16 @@ public class Shelf {
     }
 
     private void addPromotionLine(Product product) {
-        ShelfLine findLine = lines.stream()
-                .filter(line -> line.getProductName().equals(product.getName()))
+        ShelfLine findLine = findPromotionLineByName(product.getName());
+        findLine.addLast(product);
+    }
+
+    private ShelfLine findPromotionLineByName(String productName) {
+        return lines.stream()
+                .filter(line -> line.getProductName().equals(productName))
                 .filter(line -> line.getPromotion().isValid())
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
-        findLine.addLast(product);
     }
 
     private void addNormalLine(Product product) {
@@ -135,5 +139,9 @@ public class Shelf {
 
     private boolean isPromotionInsufficient(int quantity, int promotionStockCount) {
         return quantity > promotionStockCount;
+    }
+
+    public int countPromotionProductByName(String productName) {
+        return findPromotionLineByName(productName).getCount();
     }
 }
