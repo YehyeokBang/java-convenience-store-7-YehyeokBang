@@ -34,7 +34,7 @@ public class StoreStaff {
     }
 
     private boolean isPromotionValid(Product product) {
-        return product.getPromotion().isValid();
+        return product.getPromotion().isApplicableToday();
     }
 
     private int calculateRemainingQuantityForPromotion(int totalPromotionQuantity, Promotion promotion) {
