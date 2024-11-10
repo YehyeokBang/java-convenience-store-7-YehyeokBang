@@ -1,8 +1,10 @@
 package store.model.order.parser;
 
 import static store.message.InputErrorMessage.INVALID_FORMAT;
+import static store.message.InputErrorMessage.INVALID_INPUT;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import store.model.order.Order;
 
@@ -18,9 +20,9 @@ public class ConsoleOrderParser implements OrderParser<String> {
     public List<Order> parse(String rawInputOrder) {
         String trimmedInput = removeSpaces(rawInputOrder);
         String[] rawOrders = splitOrder(trimmedInput);
-        return Arrays.stream(rawOrders)
-                .map(this::parseOrder)
-                .toList();
+        List<Order> orders = getOrders(rawOrders);
+        validateOrderDuplicate(orders);
+        return orders;
     }
 
     private String removeSpaces(String input) {
@@ -50,9 +52,8 @@ public class ConsoleOrderParser implements OrderParser<String> {
     private Order createOrder(String content) {
         String[] parts = splitOrderContent(content);
         String productName = parts[0];
-        String quantity = parts[1];
-        validateInteger(quantity);
-        return new Order(productName, Integer.parseInt(quantity));
+        int quantity = parseInt(parts[1]);
+        return new Order(productName, quantity);
     }
 
     private String[] splitOrderContent(String content) {
@@ -63,11 +64,24 @@ public class ConsoleOrderParser implements OrderParser<String> {
         return parts;
     }
 
-    private void validateInteger(String input) {
+    private int parseInt(String input) {
         try {
-            Integer.parseInt(input);
+            return Integer.parseInt(input);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(INVALID_FORMAT.get());
+        }
+    }
+
+    private List<Order> getOrders(String[] rawOrders) {
+        return Arrays.stream(rawOrders)
+                .map(this::parseOrder)
+                .toList();
+    }
+
+    private void validateOrderDuplicate(List<Order> orders) {
+        int uniqueSize = new HashSet<>(orders).size();
+        if (uniqueSize != orders.size()) {
+            throw new IllegalArgumentException(INVALID_INPUT.get());
         }
     }
 }
