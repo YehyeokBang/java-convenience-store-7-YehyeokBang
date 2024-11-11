@@ -14,7 +14,8 @@ public enum FileErrorMessage {
     INVALID_PROMOTION_DATE_FORMAT("프로모션 날짜 형식이 잘못되었습니다. (올바른 형식: YYYY-MM-DD)"),
     INVALID_PROMOTION_DATE_ORDER("프로모션의 시작 날짜가 종료 날짜보다 늦습니다."),
     INVALID_PROMOTION_GET_AMOUNT("프로모션 '증정 수량'이 1이 아닙니다."),
-    INVALID_PROMOTION_BUY_AMOUNT("프로모션 '구매 수량'이 1보다 작습니다.");;
+    INVALID_PROMOTION_BUY_AMOUNT("프로모션 '구매 수량'이 1보다 작습니다."),
+    ;
 
     private static final String MESSAGE_PREFIX = "[ERROR] ";
 
