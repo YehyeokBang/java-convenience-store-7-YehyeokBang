@@ -1,108 +1,146 @@
 package store.view;
 
 import java.util.List;
-import store.dto.DisplayProduct;
+import store.dto.ProductDetails;
 import store.dto.ProductInfo;
 import store.dto.ReceiptData;
 
 public class OutputView {
 
-    private static final String WELCOME_MESSAGE = "안녕하세요. W편의점입니다.";
-    private static final String CURRENT_PRODUCTS_MESSAGE = "현재 보유하고 있는 상품입니다.";
-    private static final String PRODUCT_INFO_MESSAGE = "- %s %s원 %s";
-    private static final String PROMOTION_PRODUCT_INFO_MESSAGE = "- %s %s원 %s %s";
+    private static final String WELCOME = "안녕하세요. W편의점입니다.";
+    private static final String CURRENT_PRODUCTS = "현재 보유하고 있는 상품입니다.";
     private static final String NO_PROMOTION = "null";
     private static final String NO_STOCK = "재고 없음";
-    private static final String RECEIPT_HEADER = "==============W 편의점================\n";
-    private static final String PRODUCT_HEADER = String.format("%-8s\t\t\t%-2s\t\t%s\n", "상품명", "수량", "금액");
+    private static final String HEADER = "==============W 편의점================\n";
+    private static final String PRODUCT_HEADER = "%-8s\t\t\t%-2s\t\t%s\n";
     private static final String PROMOTION_HEADER = "=============증\t\t정===============\n";
-    private static final String TOTAL_LABEL = "%-8s\t\t\t%-2s\t\t%,d\n";
-    private static final String DISCOUNT_LABEL = "%-10s\t\t\t\t-%,d\n";
-    private static final String TOTAL_PRICE_LABEL = "%-10s\t\t\t\t %,d\n";
-    private static final String RECEIPT_FOOTER = "====================================\n";
+    private static final String FOOTER = "====================================\n";
+    private static final String PRODUCT_LINE = "%-8s\t\t\t%-2d\t\t%,d\n";
+    private static final String PROMOTION_LINE = "%-8s\t\t\t%-2d\n";
+    private static final String TOTAL_LINE = "%-8s\t\t\t%-2s\t\t%,d\n";
+    private static final String DISCOUNT_LINE = "%-10s\t\t\t\t-%,d\n";
+    private static final String FINAL_PRICE_LINE = "%-10s\t\t\t\t %,d\n";
+
+    private final ProductFormatter productFormatter;
+    private final ReceiptFormatter receiptFormatter;
+
+    public OutputView() {
+        this.productFormatter = new ProductFormatter();
+        this.receiptFormatter = new ReceiptFormatter();
+    }
 
     public void printWelcomeMessage() {
-        System.out.println(WELCOME_MESSAGE);
+        println(WELCOME);
     }
 
     public void printCurrentProductsMessage() {
-        System.out.println(CURRENT_PRODUCTS_MESSAGE + System.lineSeparator());
+        println(CURRENT_PRODUCTS + System.lineSeparator());
     }
 
-    public void printDisplayProducts(List<DisplayProduct> displayProducts) {
-        for (DisplayProduct product : displayProducts) {
-            if (isPromotionProduct(product)) {
-                System.out.println(getPromotionProductInfo(product));
-                continue;
-            }
-            System.out.println(getProductInfo(product));
-        }
-    }
-
-    private String getProductInfo(DisplayProduct displayProduct) {
-        return String.format(PRODUCT_INFO_MESSAGE,
-                displayProduct.name(),
-                formatPrice(displayProduct),
-                formatQuantity(displayProduct)
-        );
-    }
-
-    private String getPromotionProductInfo(DisplayProduct product) {
-        return String.format(PROMOTION_PRODUCT_INFO_MESSAGE,
-                product.name(),
-                formatPrice(product),
-                formatQuantity(product),
-                product.promotion()
-        );
-    }
-
-    private String formatPrice(DisplayProduct displayProduct) {
-        return String.format("%,d", displayProduct.price());
-    }
-
-    private String formatQuantity(DisplayProduct displayProduct) {
-        if (displayProduct.quantity() == 0) {
-            return NO_STOCK;
-        }
-        return displayProduct.quantity() + "개";
-    }
-
-    private boolean isPromotionProduct(DisplayProduct displayProduct) {
-        return !displayProduct.promotion()
-                .equals(NO_PROMOTION);
+    public void printProductDetails(List<ProductDetails> products) {
+        String formattedProducts = productFormatter.formatProducts(products);
+        println(formattedProducts);
     }
 
     public void printReceipt(ReceiptData receiptData) {
-        StringBuilder receipt = new StringBuilder(System.lineSeparator());
-        writeReceiptHeader(receiptData, receipt);
-        writePromotion(receiptData, receipt);
-        writeFooter(receiptData, receipt);
-        System.out.println(receipt);
+        String formattedReceipt = receiptFormatter.formatReceipt(receiptData);
+        println(formattedReceipt);
     }
 
-    private void writeReceiptHeader(ReceiptData receiptData, StringBuilder receipt) {
-        receipt.append(RECEIPT_HEADER);
-        receipt.append(PRODUCT_HEADER);
-        for (ProductInfo info : receiptData.products()) {
-            receipt.append(String.format("%-8s\t\t\t%-2d\t\t%,d\n", info.name(), info.quantity(), info.price()));
+    private void println(String message) {
+        System.out.println(message);
+    }
+
+    private static class ProductFormatter {
+
+        private static final String PRODUCT_FORMAT = "- %s %s원 %s";
+        private static final String PROMOTION_PRODUCT_FORMAT = "- %s %s원 %s %s";
+
+        String formatProducts(List<ProductDetails> products) {
+            return products.stream()
+                    .map(this::formatProduct)
+                    .reduce(new StringBuilder(), StringBuilder::append, StringBuilder::append)
+                    .toString();
+        }
+
+        private StringBuilder formatProduct(ProductDetails product) {
+            if (isPromotionProduct(product)) {
+                String formatted = formatPromotionProduct(product);
+                return new StringBuilder(formatted).append(System.lineSeparator());
+            }
+            String formatted = formatRegularProduct(product);
+            return new StringBuilder(formatted).append(System.lineSeparator());
+        }
+
+        private String formatRegularProduct(ProductDetails product) {
+            return String.format(PRODUCT_FORMAT,
+                    product.name(),
+                    formatPrice(product.price()),
+                    formatQuantity(product.quantity()));
+        }
+
+        private String formatPromotionProduct(ProductDetails product) {
+            return String.format(PROMOTION_PRODUCT_FORMAT,
+                    product.name(),
+                    formatPrice(product.price()),
+                    formatQuantity(product.quantity()),
+                    product.promotion());
+        }
+
+        private String formatPrice(int price) {
+            return String.format("%,d", price);
+        }
+
+        private String formatQuantity(int quantity) {
+            if (quantity == 0) {
+                return NO_STOCK;
+            }
+            return quantity + "개";
+        }
+
+        private boolean isPromotionProduct(ProductDetails product) {
+            return !product.promotion()
+                    .equals(NO_PROMOTION);
         }
     }
 
-    private void writePromotion(ReceiptData receiptData, StringBuilder receipt) {
-        List<ProductInfo> promotionProducts = receiptData.promotionProducts();
-        if (!promotionProducts.isEmpty()) {
-            receipt.append(PROMOTION_HEADER);
-            for (ProductInfo info : promotionProducts) {
-                receipt.append(String.format("%-8s\t\t\t%-2d\n", info.name(), info.quantity()));
+    private static class ReceiptFormatter {
+
+        String formatReceipt(ReceiptData data) {
+            StringBuilder receipt = new StringBuilder(System.lineSeparator());
+            appendReceiptHeader(data, receipt);
+            appendPromotionSection(data, receipt);
+            appendFooter(data, receipt);
+            return receipt.toString();
+        }
+
+        private void appendReceiptHeader(ReceiptData data, StringBuilder receipt) {
+            receipt.append(HEADER)
+                    .append(String.format(PRODUCT_HEADER, "상품명", "수량", "금액"));
+            for (ProductInfo product : data.products()) {
+                String message = String.format(PRODUCT_LINE, product.name(), product.quantity(), product.price());
+                receipt.append(message);
             }
         }
-    }
 
-    private void writeFooter(ReceiptData receiptData, StringBuilder receipt) {
-        receipt.append(RECEIPT_FOOTER);
-        receipt.append(String.format(TOTAL_LABEL, "총구매액", receiptData.totalQuantity(), receiptData.totalPrice()));
-        receipt.append(String.format(DISCOUNT_LABEL, "행사할인", receiptData.discountPrice()));
-        receipt.append(String.format(DISCOUNT_LABEL, "멤버십할인", receiptData.membershipPrice()));
-        receipt.append(String.format(TOTAL_PRICE_LABEL, "내실돈\t", receiptData.finalPrice()));
+        private void appendPromotionSection(ReceiptData data, StringBuilder receipt) {
+            List<ProductInfo> promotionProducts = data.promotionProducts();
+            if (promotionProducts.isEmpty()) {
+                return;
+            }
+            receipt.append(PROMOTION_HEADER);
+            for (ProductInfo product : promotionProducts) {
+                String message = String.format(PROMOTION_LINE, product.name(), product.quantity());
+                receipt.append(message);
+            }
+        }
+
+        private void appendFooter(ReceiptData data, StringBuilder receipt) {
+            receipt.append(FOOTER)
+                    .append(String.format(TOTAL_LINE, "총구매액", data.totalQuantity(), data.totalPrice()))
+                    .append(String.format(DISCOUNT_LINE, "행사할인", data.discountPrice()))
+                    .append(String.format(DISCOUNT_LINE, "멤버십할인", data.membershipPrice()))
+                    .append(String.format(FINAL_PRICE_LINE, "내실돈\t", data.finalPrice()));
+        }
     }
 }

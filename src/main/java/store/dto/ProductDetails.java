@@ -1,6 +1,6 @@
 package store.dto;
 
-public record DisplayProduct(
+public record ProductDetails(
         String name,
         int price,
         int quantity,

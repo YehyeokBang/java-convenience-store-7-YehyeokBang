@@ -1,7 +1,7 @@
 package store.model.store;
 
 import java.util.List;
-import store.dto.DisplayProduct;
+import store.dto.ProductDetails;
 import store.data.StoreDataProvider;
 import store.data.StoreProductManager;
 import store.data.product.ProductData;
@@ -45,7 +45,7 @@ public class Store {
         return new StoreProductManager(promotionDataProvider, productDataProvider);
     }
 
-    public List<DisplayProduct> getInfo() {
+    public List<ProductDetails> getInfo() {
         return shelf.getInfo();
     }
 

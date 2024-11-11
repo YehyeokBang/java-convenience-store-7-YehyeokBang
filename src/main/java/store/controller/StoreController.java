@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
-import store.dto.DisplayProduct;
+import store.dto.ProductDetails;
 import store.dto.ProductInfo;
 import store.dto.ReceiptData;
 import store.model.Customer;
@@ -59,9 +59,9 @@ public class StoreController {
         outputView.printWelcomeMessage();
     }
 
-    private void showProducts(List<DisplayProduct> products) {
+    private void showProducts(List<ProductDetails> products) {
         outputView.printCurrentProductsMessage();
-        outputView.printDisplayProducts(products);
+        outputView.printProductDetails(products);
     }
 
     private List<Product> orderProducts(Store store, Customer customer) {

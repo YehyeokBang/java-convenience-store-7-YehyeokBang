@@ -5,7 +5,7 @@ import static store.message.InputErrorMessage.NON_EXISTENT_PRODUCT;
 
 import java.util.ArrayList;
 import java.util.List;
-import store.dto.DisplayProduct;
+import store.dto.ProductDetails;
 
 public class Shelf {
 
@@ -45,16 +45,16 @@ public class Shelf {
         findLine.addLast(product);
     }
 
-    public List<DisplayProduct> getInfo() {
-        List<DisplayProduct> displayProducts = new ArrayList<>();
+    public List<ProductDetails> getInfo() {
+        List<ProductDetails> productDetails = new ArrayList<>();
         for (ShelfLine line : lines) {
             String productName = line.getProductName();
             int price = line.getPrice();
             int quantity = getStockCount(line);
             String promotionName = getPromotionName(line);
-            displayProducts.add(new DisplayProduct(productName, price, quantity, promotionName));
+            productDetails.add(new ProductDetails(productName, price, quantity, promotionName));
         }
-        return displayProducts;
+        return productDetails;
     }
 
     private String getPromotionName(ShelfLine line) {
