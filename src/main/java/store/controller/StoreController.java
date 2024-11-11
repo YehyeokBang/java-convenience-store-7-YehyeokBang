@@ -158,40 +158,81 @@ public class StoreController {
     }
 
     private ReceiptData calculatePayments(boolean isMembership, Map<String, List<Product>> groupedProducts) {
-        List<ProductInfo> productInfos = new ArrayList<>();
-        List<ProductInfo> promotionProductInfos = new ArrayList<>();
         int totalPrice = getTotalPrice(groupedProducts);
         int totalQuantity = getTotalQuantity(groupedProducts);
-        int promotionDiscount = 0;
-        int promotionAppliedAmount = 0;
+        int promotionDiscount = getPromotionDiscount(groupedProducts);
+        int promotionAppliedAmount = getPromotionAppliedAmount(groupedProducts);
+        int membershipDiscountPrice = getMembershipDiscountPrice(isMembership, totalPrice - promotionAppliedAmount);
+        int finalPrice = totalPrice - membershipDiscountPrice - promotionDiscount;
+        List<ProductInfo> productInfos = getProductInfos(groupedProducts);
+        List<ProductInfo> promotionProductInfos = getPromotionProductInfos(groupedProducts);
+        return new ReceiptData(productInfos, promotionProductInfos, totalQuantity, totalPrice, promotionDiscount, membershipDiscountPrice, finalPrice);
+    }
+
+    private List<ProductInfo> getProductInfos(Map<String, List<Product>> groupedProducts) {
+        List<ProductInfo> productInfos = new ArrayList<>();
         for (Map.Entry<String, List<Product>> entry : groupedProducts.entrySet()) {
             String productName = entry.getKey();
             List<Product> productList = entry.getValue();
             Product product = productList.getFirst();
             int quantity = productList.size();
-            int promotionQuantity = getPromotionProductCount(productList);
-            int price = product.getPrice();
+            productInfos.add(new ProductInfo(productName, product.getPrice() * quantity, quantity));
+        }
+        return productInfos;
+    }
 
-            int promotionGetQuantity = 0;
+    private List<ProductInfo> getPromotionProductInfos(Map<String, List<Product>> groupedProducts) {
+        List<ProductInfo> promotionProductInfos = new ArrayList<>();
+        for (Map.Entry<String, List<Product>> entry : groupedProducts.entrySet()) {
+            List<Product> productList = entry.getValue();
+            Product product = productList.getFirst();
+            int promotionQuantity = getPromotionProductCount(productList);
+            int promotionGetQuantity;
             if (product.hasPromotion()) {
                 Promotion promotion = product.getPromotion();
                 if (promotion.isApplicableToday()) {
-                    promotionGetQuantity =
-                            promotionQuantity / (promotion.getBuyQuantity() + promotion.getFreeQuantity());
-                    promotionAppliedAmount =
-                            promotionGetQuantity * (promotion.getBuyQuantity() + promotion.getFreeQuantity()) * price;
+                    promotionGetQuantity = promotionQuantity / (promotion.getBuyQuantity() + promotion.getFreeQuantity());
+                    promotionProductInfos.add(new ProductInfo(product.getName(), product.getPrice(), promotionGetQuantity));
                 }
             }
-            productInfos.add(new ProductInfo(productName, price * quantity, quantity));
-            if (promotionGetQuantity > 0) {
-                promotionDiscount += price * promotionGetQuantity;
-                promotionProductInfos.add(new ProductInfo(productName, price, promotionGetQuantity));
+        }
+        return promotionProductInfos;
+    }
+
+    private int getPromotionDiscount(Map<String, List<Product>> groupedProducts) {
+        int promotionDiscount = 0;
+        for (Map.Entry<String, List<Product>> entry : groupedProducts.entrySet()) {
+            List<Product> productList = entry.getValue();
+            Product product = productList.getFirst();
+            int promotionQuantity = getPromotionProductCount(productList);
+            int promotionGetQuantity;
+            if (product.hasPromotion()) {
+                Promotion promotion = product.getPromotion();
+                if (promotion.isApplicableToday()) {
+                    promotionGetQuantity = promotionQuantity / (promotion.getBuyQuantity() + promotion.getFreeQuantity());
+                    promotionDiscount += product.getPrice() * promotionGetQuantity;
+                }
             }
         }
-        int membershipDiscountPrice = getMembershipDiscountPrice(isMembership, totalPrice - promotionAppliedAmount);
-        int finalPrice = totalPrice - membershipDiscountPrice - promotionDiscount;
-        return new ReceiptData(productInfos, promotionProductInfos, totalQuantity, totalPrice, promotionDiscount,
-                membershipDiscountPrice, finalPrice);
+        return promotionDiscount;
+    }
+
+    private int getPromotionAppliedAmount(Map<String, List<Product>> groupedProducts) {
+        int promotionAppliedAmount = 0;
+        for (Map.Entry<String, List<Product>> entry : groupedProducts.entrySet()) {
+            List<Product> productList = entry.getValue();
+            Product product = productList.getFirst();
+            int promotionQuantity = getPromotionProductCount(productList);
+            int price = product.getPrice();
+            if (product.hasPromotion()) {
+                Promotion promotion = product.getPromotion();
+                if (promotion.isApplicableToday()) {
+                    int promotionGetQuantity = promotionQuantity / (promotion.getBuyQuantity() + promotion.getFreeQuantity());
+                    promotionAppliedAmount += promotionGetQuantity * (promotion.getBuyQuantity() + promotion.getFreeQuantity()) * price;
+                }
+            }
+        }
+        return promotionAppliedAmount;
     }
 
     private int getTotalPrice(Map<String, List<Product>> groupedProducts) {
