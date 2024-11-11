@@ -1,5 +1,7 @@
 package store.model.store;
 
+import store.model.event.Promotion;
+
 public class Product {
 
     private final String name;

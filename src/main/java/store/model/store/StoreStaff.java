@@ -1,6 +1,8 @@
 package store.model.store;
 
 import java.util.List;
+import store.model.event.Promotion;
+import store.model.event.PromotionResult;
 
 public class StoreStaff {
 

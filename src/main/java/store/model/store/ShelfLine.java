@@ -5,6 +5,7 @@ import static store.message.InputErrorMessage.EXCEEDS_STOCK;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import store.model.event.Promotion;
 
 public class ShelfLine {
 

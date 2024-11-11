@@ -1,4 +1,4 @@
-package store.model.store;
+package store.model.event;
 
 import camp.nextstep.edu.missionutils.DateTimes;
 import java.time.LocalDate;
@@ -30,7 +30,6 @@ public class Promotion {
     }
 
     public boolean isApplicableToday() {
-        validPromotion();
         LocalDate today = getToday();
         return isStartDateValid(today) && isEndDateValid(today);
     }
@@ -49,12 +48,6 @@ public class Promotion {
 
     private boolean isStartDateValid(LocalDate today) {
         return today.isEqual(startDate) || today.isAfter(startDate);
-    }
-
-    private void validPromotion() {
-        if (!isValid()) {
-            throw new IllegalStateException("존재하지 않는 프로모션입니다.");
-        }
     }
 
     public String getName() {

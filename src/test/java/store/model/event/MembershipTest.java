@@ -1,4 +1,4 @@
-package store.model.store;
+package store.model.event;
 
 import static org.junit.jupiter.api.Assertions.*;
 

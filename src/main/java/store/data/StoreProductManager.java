@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import store.data.product.ProductData;
 import store.data.promotion.PromotionData;
 import store.model.store.Product;
-import store.model.store.Promotion;
+import store.model.event.Promotion;
 import store.model.store.ShelfLine;
 
 public class StoreProductManager {
