@@ -12,8 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ApplicationTest extends NsTest {
 
+    @DisplayName("파일에 있는 상품 목록을 출력한다.")
     @Test
-    void 파일에_있는_상품_목록_출력() {
+    void showProductsInFile() {
         assertSimpleTest(() -> {
             run("[물-1]", "N", "N");
             assertThat(output()).contains(
@@ -69,45 +70,71 @@ class ApplicationTest extends NsTest {
         });
     }
 
+    @DisplayName("여러 개의 일반 상품을 구매한다.")
     @Test
-    void 여러_개의_일반_상품_구매() {
+    void buyNormalProducts() {
         assertSimpleTest(() -> {
             run("[비타민워터-3],[물-2],[정식도시락-2]", "N", "N");
             assertThat(output().replaceAll("\\s", "")).contains("내실돈18,300");
         });
     }
 
+    @DisplayName("기간에 해당하지 않는 프로모션은 적용되지 않는다.")
     @Test
-    void 기간에_해당하지_않는_프로모션_적용() {
+    void promotionDateIsInvalid() {
         assertNowTest(() -> {
             run("[감자칩-2]", "N", "N");
             assertThat(output().replaceAll("\\s", "")).contains("내실돈3,000");
         }, LocalDate.of(2024, 2, 1).atStartOfDay());
     }
 
+    @DisplayName("기간에 해당하지 않는 프로모션은 적용되지 않는다. (2번 연속 구매)")
     @Test
-    void 기간에_해당하지_않는_프로모션_적용_연속_구매() {
+    void promotionDateIsInvalid_When2buy() {
         assertNowTest(() -> {
             run("[감자칩-2]", "N", "Y", "[감자칩-2]", "N", "N");
             assertThat(output().replaceAll("\\s", "")).contains("내실돈3,000");
         }, LocalDate.of(2024, 2, 1).atStartOfDay());
     }
 
+    @DisplayName("재고가 부족한 경우 예러 메시지가 출력된다.")
     @Test
-    void 예외_테스트() {
+    void shouldThrowException_WhenInsufficientTotalStock() {
         assertSimpleTest(() -> {
             runException("[컵라면-12]", "N", "N");
             assertThat(output()).contains("[ERROR] 재고 수량을 초과하여 구매할 수 없습니다. 다시 입력해 주세요.");
         });
     }
 
-    @DisplayName("프로모션 재고가 부족한 경우 안내한다.")
+    @DisplayName("프로모션 재고가 부족한 경우 일반 금액 결제를 안내한다.")
     @Test
     void shouldThrowException_WhenPromotionStockIsInsufficient() {
         assertSimpleTest(() -> {
             runException("[콜라-11]", "Y", "N");
+            assertThat(output()).isNotIn("프로모션 할인이 적용되지 않습니다.");
             assertThat(output()).contains("현재 콜라 2개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)");
             assertThat(output().replaceAll("\\s", "")).contains("내실돈8,000");
+        });
+    }
+
+    @DisplayName("2+1 상품을 1개만 구매한 경우 아무 안내도 나오지 않는다.")
+    @Test
+    void shouldNotShowPromotionMessage_WhenOnlyOneItemPurchased() {
+        assertSimpleTest(() -> {
+            runException("[콜라-1]", "N", "N");
+            assertThat(output()).isNotIn("프로모션 할인이 적용되지 않습니다.", "무료로 더 받을 수 있습니다.");
+            assertThat(output().replaceAll("\\s", "")).contains("내실돈1,000");
+        });
+    }
+
+    @DisplayName("2+1 상품을 2개만 구매한 경우 무료로 받을 수 있다는 안내가 출력된다. (추가 구매)")
+    @Test
+    void shouldShowPromotionMessage_WhenTwoItemsPurchased() {
+        assertSimpleTest(() -> {
+            runException("[콜라-2]", "Y", "N", "N");
+            assertThat(output()).isNotIn("프로모션 할인이 적용되지 않습니다.");
+            assertThat(output()).contains("무료로 더 받을 수 있습니다.");
+            assertThat(output().replaceAll("\\s", "")).contains("내실돈2,000");
         });
     }
 
