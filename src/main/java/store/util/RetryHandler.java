@@ -1,6 +1,6 @@
 package store.util;
 
-public class RetryHandler {
+public final class RetryHandler {
 
     private RetryHandler() {
     }
