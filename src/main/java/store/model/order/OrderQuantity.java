@@ -2,13 +2,13 @@ package store.model.order;
 
 import static store.message.InputErrorMessage.INVALID_FORMAT;
 
-public class Quantity {
+public class OrderQuantity {
 
     private static final int MINIMUM_ORDER_QUANTITY = 1;
 
     private final int value;
 
-    public Quantity(int value) {
+    public OrderQuantity(int value) {
         validateQuantity(value);
         this.value = value;
     }

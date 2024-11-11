@@ -5,11 +5,11 @@ import java.util.Objects;
 public class Order {
 
     private final ProductName productName;
-    private final Quantity quantity;
+    private final OrderQuantity quantity;
 
     public Order(String productName, int quantity) {
         this.productName = new ProductName(productName);
-        this.quantity = new Quantity(quantity);
+        this.quantity = new OrderQuantity(quantity);
     }
 
     public String getName() {
