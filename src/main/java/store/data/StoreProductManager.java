@@ -10,11 +10,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import store.data.product.ProductData;
 import store.data.promotion.PromotionData;
+import store.dto.PriceTag;
 import store.model.store.Product;
 import store.model.event.Promotion;
 import store.model.store.ShelfLine;
 
 public class StoreProductManager {
+
+    public static final String NO_PROMOTION = "null";
 
     private final StoreDataProvider<PromotionData> promotionDataProvider;
     private final StoreDataProvider<ProductData> productDataProvider;
@@ -25,10 +28,9 @@ public class StoreProductManager {
         this.productDataProvider = productDataProvider;
     }
 
-    public List<ShelfLine> getProducts() {
+    public List<ShelfLine> initShelfLines() {
         List<ShelfLine> initialShelfLines = createInitialShelfLines();
-        Map<String, List<ShelfLine>> productsByName = groupProductsByName(initialShelfLines);
-        List<ShelfLine> additionalProducts = createMissingNonPromotedProducts(productsByName);
+        List<ShelfLine> additionalProducts = addMissingNonPromotedProducts(initialShelfLines);
         return combineProducts(initialShelfLines, additionalProducts);
     }
 
@@ -43,20 +45,12 @@ public class StoreProductManager {
         Promotion promotion = createPromotion(data.promotionName());
         return new ShelfLine(
                 createProducts(data, promotion),
-                data.name(),
-                data.price(),
-                promotion
+                createPriceTag(data.name(), data.price(), promotion)
         );
     }
 
-    private Deque<Product> createProducts(ProductData data, Promotion promotion) {
-        return Stream.generate(() -> new Product(data.name(), data.price(), promotion))
-                .limit(data.quantity())
-                .collect(Collectors.toCollection(ArrayDeque::new));
-    }
-
     private Promotion createPromotion(String promotionName) {
-        if (promotionName.equals("null")) {
+        if (promotionName.equals(NO_PROMOTION)) {
             return Promotion.getNoPromotion();
         }
         return createPromotionFromData(findPromotionData(promotionName));
@@ -70,6 +64,16 @@ public class StoreProductManager {
                 .orElseThrow(() -> new IllegalStateException(EMPTY_PROMOTION.get()));
     }
 
+    private Deque<Product> createProducts(ProductData data, Promotion promotion) {
+        return Stream.generate(() -> new Product(data.name(), data.price(), promotion))
+                .limit(data.quantity())
+                .collect(Collectors.toCollection(ArrayDeque::new));
+    }
+
+    private PriceTag createPriceTag(String productName, int price, Promotion promotion) {
+        return new PriceTag(productName, price, promotion);
+    }
+
     private Promotion createPromotionFromData(PromotionData data) {
         return new Promotion(
                 data.name(),
@@ -78,6 +82,11 @@ public class StoreProductManager {
                 data.startDate(),
                 data.endDate()
         );
+    }
+
+    private List<ShelfLine> addMissingNonPromotedProducts(List<ShelfLine> initialShelfLines) {
+        Map<String, List<ShelfLine>> productsByName = groupProductsByName(initialShelfLines);
+        return createMissingNonPromotedProducts(productsByName);
     }
 
     private Map<String, List<ShelfLine>> groupProductsByName(List<ShelfLine> shelfLines) {
@@ -112,7 +121,7 @@ public class StoreProductManager {
         int price = entry.getValue()
                 .getFirst()
                 .getPrice();
-        return new ShelfLine(new ArrayDeque<>(), productName, price, Promotion.getNoPromotion());
+        return new ShelfLine(new ArrayDeque<>(), createPriceTag(productName, price, Promotion.getNoPromotion()));
     }
 
     private List<ShelfLine> combineProducts(List<ShelfLine> original, List<ShelfLine> additional) {

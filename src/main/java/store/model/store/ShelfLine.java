@@ -5,20 +5,17 @@ import static store.message.InputErrorMessage.EXCEEDS_STOCK;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import store.dto.PriceTag;
 import store.model.event.Promotion;
 
 public class ShelfLine {
 
     private final Deque<Product> products;
-    private final String productName;
-    private final int price;
-    private final Promotion promotion;
+    private final PriceTag priceTag;
 
-    public ShelfLine(Deque<Product> products, String productName, int price, Promotion promotion) {
+    public ShelfLine(Deque<Product> products, PriceTag priceTag) {
         this.products = products;
-        this.productName = productName;
-        this.price = price;
-        this.promotion = promotion;
+        this.priceTag = priceTag;
     }
 
     public List<Product> takeOut(int quantity) {
@@ -41,15 +38,15 @@ public class ShelfLine {
     }
 
     public String getProductName() {
-        return productName;
+        return priceTag.productName();
     }
 
     public Promotion getPromotion() {
-        return promotion;
+        return priceTag.promotion();
     }
 
     public int getPrice() {
-        return price;
+        return priceTag.price();
     }
 
     public int getCount() {

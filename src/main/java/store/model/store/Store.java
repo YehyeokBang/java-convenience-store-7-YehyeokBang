@@ -36,7 +36,7 @@ public class Store {
 
     private static List<ShelfLine> getProducts() {
         StoreProductManager storeProductManager = hireStoreManager();
-        return storeProductManager.getProducts();
+        return storeProductManager.initShelfLines();
     }
 
     private static StoreProductManager hireStoreManager() {

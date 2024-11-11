@@ -34,9 +34,9 @@ public class ProductsDataProvider extends FileReader<ProductData>
         String name = rowItem[NAME.getColumnPosition()];
         int price = parseInt(rowItem[PRICE.getColumnPosition()]);
         int quantity = parseInt(rowItem[QUANTITY.getColumnPosition()]);
-        String promotion = rowItem[PROMOTION.getColumnPosition()];
-        validate(name, price, quantity, promotion);
-        return new ProductData(name, price, quantity, promotion);
+        String promotionName = rowItem[PROMOTION.getColumnPosition()];
+        validate(name, price, quantity, promotionName);
+        return new ProductData(name, price, quantity, promotionName);
     }
 
     @Override
@@ -44,11 +44,11 @@ public class ProductsDataProvider extends FileReader<ProductData>
         return readAll();
     }
 
-    private void validate(String name, int price, int quantity, String promotion) {
+    private void validate(String name, int price, int quantity, String promotionName) {
         validateInputEmpty(name);
         validatePrice(price);
         validateQuantity(quantity);
-        validateInputEmpty(promotion);
+        validateInputEmpty(promotionName);
     }
 
     private void validateInputEmpty(String input) {
