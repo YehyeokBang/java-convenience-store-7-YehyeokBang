@@ -11,7 +11,7 @@ public class InputView {
     private static final String REQUEST_REPURCHASE_MESSAGE = "감사합니다. 구매하고 싶은 다른 상품이 있나요? (Y/N)";
 
     public String requestOrder() {
-        System.out.println(System.lineSeparator() + REQUEST_ORDER_MESSAGE);
+        System.out.println(REQUEST_ORDER_MESSAGE);
         return readInput();
     }
 
